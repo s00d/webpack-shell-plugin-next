@@ -1,11 +1,28 @@
 const spawn = require('child_process').spawn;
 const exec = require('child_process').exec;
+const spawnSync = require('child_process').spawnSync;
+const execSync = require('child_process').execSync;
 const os = require('os');
+if (!global._babelPolyfill) {
+  require('babel-polyfill');
+}
 
 const defaultOptions = {
-  onBuildStart: [],
-  onBuildEnd: [],
-  onBuildExit: [],
+  onBuildStart: {
+    scripts: [],
+    blocking: false,
+    parallel: false
+  },
+  onBuildEnd: {
+    scripts: [],
+    blocking: false,
+    parallel: false
+  },
+  onBuildExit: {
+    scripts: [],
+    blocking: false,
+    parallel: false
+  },
   dev: true,
   safe: false
 };
@@ -15,9 +32,12 @@ export default class WebpackShellPlugin {
     this.options = this.validateInput(this.mergeOptions(options, defaultOptions));
   }
 
-  puts(error, stdout, stderr) {
-    if (error) {
-      throw error;
+  putsAsync(resolve) {
+    return (error, stdout, stderr) => {
+      if (error) {
+        throw error;
+      }
+      resolve();
     }
   }
 
@@ -37,23 +57,59 @@ export default class WebpackShellPlugin {
 
   handleScript(script) {
     if (os.platform() === 'win32' || this.options.safe) {
-      this.spreadStdoutAndStdErr(exec(script, this.puts));
+      const buffer = execSync(script, {stdio: 'inherit'});
     } else {
       const {command, args} = this.serializeScript(script);
-      const proc = spawn(command, args, {stdio: 'inherit'});
-      proc.on('close', this.puts);
+      spawnSync(command, args, {stdio: 'inherit'});
+    }
+  }
+
+  handleScriptAsync(script) {
+    if (os.platform() === 'win32' || this.options.safe) {
+      return new Promise((resolve) => {
+        this.spreadStdoutAndStdErr(exec(script, this.putsAsync(resolve)))
+      });
+    }
+
+    const {command, args} = this.serializeScript(script);
+    const proc = spawn(command, args, {stdio: 'inherit'});
+    return new Promise((resolve) => proc.on('close', this.putsAsync(resolve)));
+  }
+
+  async executeScripts(scripts, parallel, blocking) {
+    if (!scripts || scripts.length <= 0) {
+      return;
+    }
+
+    if (blocking && !parallel) {
+      for (let i = 0; i < scripts.length; i++) {
+        this.handleScript(scripts[i]);
+      }
+    }
+    else if (!blocking && !parallel) {
+      for (let i = 0; i < scripts.length; i++) {
+        await this.handleScriptAsync(scripts[i]);
+      }
+    }
+    else if (blocking && parallel) {
+      throw new Exception("Not supported");
+    }
+    else if (!blocking && parallel) {
+      for (let i = 0; i < scripts.length; i++) {
+        this.handleScriptAsync(scripts[i], blocking);
+      }
     }
   }
 
   validateInput(options) {
     if (typeof options.onBuildStart === 'string') {
-      options.onBuildStart = options.onBuildStart.split('&&');
+      options.onBuildStart.scripts = options.onBuildStart.split('&&');
     }
     if (typeof options.onBuildEnd === 'string') {
-      options.onBuildEnd = options.onBuildEnd.split('&&');
+      options.onBuildEnd.scripts = options.onBuildEnd.split('&&');
     }
     if (typeof options.onBuildExit === 'string') {
-      options.onBuildExit = options.onBuildExit.split('&&');
+      options.onBuildExit.scripts = options.onBuildExit.split('&&');
     }
     return options;
   }
@@ -70,15 +126,15 @@ export default class WebpackShellPlugin {
   
   apply(compiler) {
     compiler.hooks.compilation.tap('webpack-shell-plugin-next', (compilation) => {
+      const onBuildStartOption = this.options.onBuildStart;
       if (this.options.verbose) {
         console.log(`Report compilation: ${compilation}`);
         console.warn(`WebpackShellPlugin [${new Date()}]: Verbose is being deprecated, please remove.`);
       }
-      if (this.options.onBuildStart.length) {
+      if (onBuildStartOption.scripts && onBuildStartOption.scripts.length > 0) {
         console.log('Executing pre-build scripts');
-        for (let i = 0; i < this.options.onBuildStart.length; i++) {
-          this.handleScript(this.options.onBuildStart[i]);
-        }
+        this.executeScripts(onBuildStartOption.scripts, onBuildStartOption.parallel, onBuildStartOption.blocking);
+
         if (this.options.dev) {
           this.options.onBuildStart = [];
         }
@@ -86,24 +142,22 @@ export default class WebpackShellPlugin {
     });
 
     compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', (compilation, callback) => {
-      if (this.options.onBuildEnd.length) {
+      const onBuildEndOption = this.options.onBuildEnd;
+      if (onBuildEndOption.scripts && onBuildEndOption.scripts.length > 0) {
         console.log('Executing post-build scripts');
-        for (let i = 0; i < this.options.onBuildEnd.length; i++) {
-          this.handleScript(this.options.onBuildEnd[i]);
-        }
+        this.executeScripts(onBuildEndOption.scripts, onBuildEndOption.parallel, onBuildEndOption.blocking);
         if (this.options.dev) {
           this.options.onBuildEnd = [];
         }
       }
-      return callback();
+      callback();
     });
 
     compiler.hooks.done.tap('webpack-shell-plugin-next', () => {
-      if (this.options.onBuildExit.length) {
+      const onBuildExitOption = this.options.onBuildExit;
+      if (onBuildExitOption.scripts && onBuildExitOption.scripts.length > 0) {
         console.log('Executing additional scripts before exit');
-        for (let i = 0; i < this.options.onBuildExit.length; i++) {
-          this.handleScript(this.options.onBuildExit[i]);
-        }
+        this.executeScripts(onBuildExitOption.scripts, onBuildExitOption.parallel, onBuildExitOption.blocking);
       }
     });
   }
