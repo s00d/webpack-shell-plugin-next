@@ -1,7 +1,7 @@
 [![npm version](https://badge.fury.io/js/webpack-shell-plugin-next.svg)](https://badge.fury.io/js/webpack-shell-plugin-next)
-![](https://reposs.herokuapp.com/?path=1337programming/webpack-shell-plugin-next)
-[![npm](https://img.shields.io/npm/dm/webpack-shell-plugin-next.svg)]()
 # Webpack Shell Plugin Next
+
+fix webpack 4 deprecated method.
 
 This plugin allows you to run any shell commands before or after webpack 4 builds. This will work for both webpack 4.
 
