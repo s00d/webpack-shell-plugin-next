@@ -1,0 +1,48 @@
+{
+  "name": "webpack-shell-plugin-next",
+  "version": "0.6.0",
+  "description": "Run shell commands before and after webpack builds",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "webpack --mode development",
+    "test:dev": "webpack-dev-server --progress",
+    "build": "rollup -c",
+    "webpack": "webpack --progress --mode production",
+    "webpack-dev-server": "webpack-dev-server --progress",
+    "lint": "eslint src/webpack-shell-plugin-next.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/s00d/webpack-shell-plugin.git"
+  },
+  "keywords": [
+    "webpack",
+    "shell",
+    "plugin",
+    "shell",
+    "serve",
+    "hmr",
+    "browser",
+    "script",
+    "opie",
+    "manion",
+    "1337"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/s00d/webpack-shell-plugin-next/issues"
+  },
+  "homepage": "https://github.com/s00d/webpack-shell-plugin-next",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
+    "css-loader": "^0.23.1",
+    "eslint": "^2.7.0",
+    "rollup": "^0.57.1",
+    "rollup-plugin-babel": "^3.0.3",
+    "style-loader": "^0.13.2",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.12"
+  }
+}
