@@ -4,8 +4,10 @@
   "description": "Run shell commands before and after webpack builds",
   "main": "lib/index.js",
   "scripts": {
+    "clean": "rimraf lib",
     "test": "webpack --mode development",
     "test:dev": "webpack-dev-server --progress",
+    "prepublish": "npm run clean && npm run build",
     "build": "rollup -c",
     "webpack": "webpack --progress --mode production",
     "webpack-dev-server": "webpack-dev-server --progress",
@@ -40,6 +42,7 @@
     "babel-preset-env": "^1.6.1",
     "css-loader": "^0.23.1",
     "eslint": "^2.7.0",
+    "rimraf": "^2.6.2",
     "rollup": "^0.57.1",
     "rollup-plugin-babel": "^3.0.3",
     "style-loader": "^0.13.2",
