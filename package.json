@@ -1,6 +1,6 @@
 {
   "name": "webpack-shell-plugin-next",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Run shell commands before and after webpack builds",
   "main": "lib/index.js",
   "scripts": {
