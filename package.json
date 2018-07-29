@@ -37,7 +37,7 @@
   "homepage": "https://github.com/s00d/webpack-shell-plugin-next",
   "dependencies": {
     "babel-polyfill": "^6.26.0"
-  }
+  },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
