@@ -128,11 +128,11 @@ export default class WebpackShellPlugin {
     compiler.hooks.compilation.tap('webpack-shell-plugin-next', (compilation) => {
       const onBuildStartOption = this.options.onBuildStart;
       if (this.options.verbose) {
-        console.log(`Report compilation: ${compilation}`);
+        console.warn(`Report compilation: ${compilation}`);
         console.warn(`WebpackShellPlugin [${new Date()}]: Verbose is being deprecated, please remove.`);
       }
       if (onBuildStartOption.scripts && onBuildStartOption.scripts.length > 0) {
-        console.log('Executing pre-build scripts');
+        console.warn('Executing pre-build scripts');
         this.executeScripts(onBuildStartOption.scripts, onBuildStartOption.parallel, onBuildStartOption.blocking);
 
         if (this.options.dev) {
@@ -144,7 +144,7 @@ export default class WebpackShellPlugin {
     compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', (compilation, callback) => {
       const onBuildEndOption = this.options.onBuildEnd;
       if (onBuildEndOption.scripts && onBuildEndOption.scripts.length > 0) {
-        console.log('Executing post-build scripts');
+        console.warn('Executing post-build scripts');
         this.executeScripts(onBuildEndOption.scripts, onBuildEndOption.parallel, onBuildEndOption.blocking);
         if (this.options.dev) {
           this.options.onBuildEnd = [];
@@ -156,7 +156,7 @@ export default class WebpackShellPlugin {
     compiler.hooks.done.tap('webpack-shell-plugin-next', () => {
       const onBuildExitOption = this.options.onBuildExit;
       if (onBuildExitOption.scripts && onBuildExitOption.scripts.length > 0) {
-        console.log('Executing additional scripts before exit');
+        console.warn('Executing additional scripts before exit');
         this.executeScripts(onBuildExitOption.scripts, onBuildExitOption.parallel, onBuildExitOption.blocking);
       }
     });
