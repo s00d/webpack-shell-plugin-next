@@ -1,7 +1,7 @@
 [![npm version](https://badge.fury.io/js/webpack-shell-plugin-next.svg)](https://badge.fury.io/js/webpack-shell-plugin-next)
 # Webpack Shell Plugin Next
 
-fix webpack 4 deprecated method.
+fix webpack 4 deprecated method. add typescript and other
 
 This plugin allows you to run any shell commands before or after webpack 4 builds. This will work for both webpack 4.
 
@@ -44,14 +44,23 @@ module.exports = {
 
 ### API
 * `onBeforeBuild`: array of scripts to execute before every build. 
+
 **Default: ```{scripts: [],blocking: false,parallel: false}```**
-* `onBuildError`: array of scripts to execute when there is an error during compilation. **Default: [ ]**
+
+* `onBuildError`: array of scripts to execute when there is an error during compilation.
+
 **Default: ```{scripts: [],blocking: false,parallel: false}```**
+
 * `onBuildStart`: configuration object for scripts that execute before a compilation. 
+
 **Default: ```{scripts: [],blocking: false,parallel: false}```**
+
 * `onBuildEnd`: configuration object for scripts that execute after files are emitted at the end of the compilation. 
+
 **Default: ```{scripts: [],blocking: false,parallel: false}```**
+
 * `onBuildExit`: configuration object for scripts that execute after webpack's process is complete. *Note: this event also fires in `webpack --watch` when webpack has finished updating the bundle.*
+
 **Default: ```{scripts: [],blocking: false,parallel: false}```**
 
 
@@ -85,7 +94,7 @@ Pavel Kuzmin
 
 ## Change Log
 
-### 0.7.0
+### 1.0.0
 ```
 - add ts
 - add onBeforeBuild and onBuildExit
