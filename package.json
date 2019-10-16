@@ -1,17 +1,23 @@
 {
   "name": "webpack-shell-plugin-next",
-  "version": "0.6.4",
+  "version": "1.0.0",
   "description": "Run shell commands before and after webpack builds",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "clean": "rimraf lib",
-    "test": "webpack --mode development",
+    "test": "tsc && webpack --mode development",
     "test:dev": "webpack-dev-server --progress",
     "prepublish": "npm run clean && npm run build",
-    "build": "rollup -c",
+    "prepare": "npm run build",
+    "build": "tsc",
     "webpack": "webpack --progress --mode production",
     "webpack-dev-server": "webpack-dev-server --progress",
-    "lint": "eslint src/webpack-shell-plugin-next.js"
+    "lint": "tslint --project tsconfig.json ./src/*.ts",
+    "lint:fix": "npm run lint -- --fix"
   },
   "repository": {
     "type": "git",
@@ -39,16 +45,23 @@
     "babel-polyfill": "^6.26.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.6.1",
-    "css-loader": "^0.23.1",
-    "eslint": "^2.7.0",
-    "rimraf": "^2.6.2",
-    "rollup": "^0.57.1",
-    "rollup-plugin-babel": "^3.0.3",
-    "style-loader": "^0.13.2",
-    "webpack": "^4.1.1",
-    "webpack-cli": "^2.0.12"
+    "@babel/core": "^7.6.4",
+    "@babel/plugin-external-helpers": "^7.2.0",
+    "@babel/preset-env": "^7.6.3",
+    "@types/node": "^12.11.1",
+    "@types/source-map": "^0.5.7",
+    "@types/webpack": "^4.39.3",
+    "@typescript-eslint/eslint-plugin": "^2.4.0",
+    "@typescript-eslint/parser": "^2.4.0",
+    "babel-preset-env": "^1.7.0",
+    "css-loader": "^3.2.0",
+    "rimraf": "^3.0.0",
+    "source-map": "^0.7.3",
+    "style-loader": "^1.0.0",
+    "tslint": "^5.20.0",
+    "tslint-config-airbnb": "^5.11.2",
+    "typescript": "^3.6.4",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9"
   }
 }

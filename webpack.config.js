@@ -10,17 +10,13 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js'
   },
-  /*devServer: {
-    contentBase: path.resolve(__dirname, 'test')
-  },*/
   module: {
     noParse: /node_modules\/json-schema\/lib\/validate\.js/,
     rules: [
         {
           test: /\.css$/,
           use: [
-            {loader: "style"},
-            {loader: "css-loader"}
+            {loader: 'style!css'}
           ]
         }
     ]
@@ -28,18 +24,27 @@ module.exports = {
   plugins: [
     new WebpackShellPlugin({
       onBuildStart: {
-        scripts: [],
+        scripts: ['echo "onBuildStart"'],
         blocking: true,
-        parallel: true
+        parallel: false
       },
       onBuildEnd: {
-
+        scripts: ['echo "onBuildEnd"'],
       },
       onBuildExit: {
-        scripts: ['node test.js', 'echo "second"', 'echo "third"'],
-        parallel: true
+        scripts: ['echo "wait sleep 20"', 'sleep 20', 'node test.js', 'echo "end onBuildExit"'],
+        parallel: false,
+        blocking: true,
       },
-      dev: true, safe: true, verbose: true
+      onBuildError: {
+        scripts: ['echo "Webpack ERROR"'],
+        parallel: false,
+        blocking: true,
+      },
+      dev: true,
+      safe: true,
+      verbose: true,
+      logging: true
     }),
     new webpack.HotModuleReplacementPlugin()
   ]

@@ -19,13 +19,13 @@ This plugin is meant for running simple command line executions. It is not meant
 In `webpack.config.js`:
 
 ```js
-const WebpackShellPlugin = require('webpack-shell-plugin-next');
+const WebpackShellPluginNext = require('webpack-shell-plugin-next');
 
 module.exports = {
   ...
   ...
   plugins: [
-    new WebpackShellPlugin({
+    new WebpackShellPluginNext({
       onBuildStart:{
         scripts: ['echo "Webpack Start"'],
         blocking: true,
@@ -43,47 +43,34 @@ module.exports = {
 ```
 
 ### API
-
+* `onBeforeBuild`: array of scripts to execute before every build. 
+**Default: ```{scripts: [],blocking: false,parallel: false}```**
+* `onBuildError`: array of scripts to execute when there is an error during compilation. **Default: [ ]**
+**Default: ```{scripts: [],blocking: false,parallel: false}```**
 * `onBuildStart`: configuration object for scripts that execute before a compilation. 
-**Default:**
-```js
-  {
-    scripts: [],
-    blocking: false,
-    parallel: false
-  }
-```
+**Default: ```{scripts: [],blocking: false,parallel: false}```**
 * `onBuildEnd`: configuration object for scripts that execute after files are emitted at the end of the compilation. 
-**Default:**
-```js
-  {
-    scripts: [],
-    blocking: false,
-    parallel: false
-  }
-```
+**Default: ```{scripts: [],blocking: false,parallel: false}```**
 * `onBuildExit`: configuration object for scripts that execute after webpack's process is complete. *Note: this event also fires in `webpack --watch` when webpack has finished updating the bundle.*
-**Default:**
-```js
-  {
-    scripts: [],
-    blocking: false,
-    parallel: false
-  }
-```
-* `blocking (onBuildStart, onBuildEnd, onBuildExit)`: block webpack until scripts finish execution.
-* `parallel (onBuildStart, onBuildEnd, onBuildExit)`: execute scripts in parallel, otherwise execute scripts in the order in which they are specified in the scripts array.
+**Default: ```{scripts: [],blocking: false,parallel: false}```**
 
-**Note:** below combination is not supported.
- ```js
-  {
-    blocking: true
-    parallel: true
-  } 
- ```
 
+* `blocking (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit)`: block webpack until scripts finish execution.
+* `parallel (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit)`: execute scripts in parallel, otherwise execute scripts in the order in which they are specified in the scripts array.
+* `env`: Object with environment variables that will be applied to the executables **Default: { }**
+* `logging`:  show output for internal messages.  **Default: true**
+* `swallowError`: ignore script errors (useful in watch mode) **Default: false**
 * `dev`: switch for development environments. This causes scripts to execute once. Useful for running HMR on webpack-dev-server or webpack watch mode. **Default: true**
 * `safe`: switches script execution process from spawn to exec. If running into problems with spawn, turn this setting on. **Default: false**
+
+**Note:** below combination is not supported.
+ ```
+{
+  blocking: true
+  parallel: true
+} 
+ ```
+
 
 ### Developing
 
@@ -94,4 +81,14 @@ Make sure you lint your code by running `npm run lint` and you can build the lib
 I appreciate any feed back as well, Thanks for helping!
 
 ### Contributions
-Yair Tavor
+Pavel Kuzmin
+
+## Change Log
+
+### 0.7.0
+```
+- add ts
+- add onBeforeBuild and onBuildExit
+- add logging, swallowError, dev
+```
+
