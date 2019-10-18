@@ -6,10 +6,18 @@
 import { Options } from './types';
 import * as webpack from 'webpack';
 export default class WebpackShellPlugin {
-    private options;
+    private onBeforeBuild;
+    private onBuildStart;
+    private onBuildEnd;
+    private onBuildExit;
+    private onBuildError;
+    private env;
+    private dev;
+    private safe;
+    private logging;
+    private swallowError;
+    private validateEvent;
     constructor(options: Options);
-    private mergeOptions;
-    private validateInput;
     private putsAsync;
     private puts;
     private static spreadStdoutAndStdErr;
