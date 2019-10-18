@@ -97,6 +97,7 @@ how to use functions in the queue?
             console.log('run tTimeout 1');
             setTimeout(() => console.log('end Timeout 1'), 1000);
         },
+        // async
         () => new Promise((resolve, reject) => {
             console.log('run async tTimeout');
             setTimeout(() => {
@@ -104,7 +105,6 @@ how to use functions in the queue?
                 resolve();
             }, 1000);
         }),
-        // async
     ],
     blocking: true
 }
