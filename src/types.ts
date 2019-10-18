@@ -1,7 +1,8 @@
-export type Task = {
-    scripts?: string[],
-    blocking?: false,
-    parallel?: false
+export type Task = Function|string;
+export type Tasks = {
+    scripts?: Task[],
+    blocking?: boolean,
+    parallel?: boolean
 };
 
 export type Script = {
@@ -11,22 +12,22 @@ export type Script = {
 
 export type Options = {
     /** Scripts to execute on the before build. Defaults to []. */
-    onBeforeBuild?: Task|string
+    onBeforeBuild?: Tasks|string
 
     /** Scripts to execute on the initial build. Defaults to []. */
-    onBuildStart?: Task|string
+    onBuildStart?: Tasks|string
 
     /**
      * Scripts to execute after files are emitted at the end of the
      * compilation. Defaults to [].
      */
-    onBuildEnd?: Task|string
+    onBuildEnd?: Tasks|string
 
     /** Scripts to execute after Webpack's process completes. Defaults to []. */
-    onBuildExit?: Task|string
+    onBuildExit?: Tasks|string
 
     /** Scripts to execute after Webpack's process Error. Defaults to []. */
-    onBuildError?: Task|string
+    onBuildError?: Tasks|string
 
     /**
      * Switch for development environments. This causes scripts to execute once.

@@ -1,7 +1,8 @@
-export declare type Task = {
-    scripts?: string[];
-    blocking?: false;
-    parallel?: false;
+export declare type Task = Function | string;
+export declare type Tasks = {
+    scripts?: Task[];
+    blocking?: boolean;
+    parallel?: boolean;
 };
 export declare type Script = {
     command: string;
@@ -9,18 +10,18 @@ export declare type Script = {
 };
 export declare type Options = {
     /** Scripts to execute on the before build. Defaults to []. */
-    onBeforeBuild?: Task | string;
+    onBeforeBuild?: Tasks | string;
     /** Scripts to execute on the initial build. Defaults to []. */
-    onBuildStart?: Task | string;
+    onBuildStart?: Tasks | string;
     /**
      * Scripts to execute after files are emitted at the end of the
      * compilation. Defaults to [].
      */
-    onBuildEnd?: Task | string;
+    onBuildEnd?: Tasks | string;
     /** Scripts to execute after Webpack's process completes. Defaults to []. */
-    onBuildExit?: Task | string;
+    onBuildExit?: Tasks | string;
     /** Scripts to execute after Webpack's process Error. Defaults to []. */
-    onBuildError?: Task | string;
+    onBuildError?: Tasks | string;
     /**
      * Switch for development environments. This causes scripts to execute once.
      * Useful for running HMR on webpack-dev-server or webpack watch mode.

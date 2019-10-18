@@ -5,40 +5,67 @@
  */
 
 import { spawn, exec, spawnSync, execSync, ChildProcess } from 'child_process';
-import  { Options, Script, Task } from './types';
+import  { Options, Script, Tasks, Task } from './types';
 import * as os from 'os';
 import * as webpack from 'webpack';
 import { Readable } from 'stream';
-// if (!global._babelPolyfill) {
-//     require('babel-polyfill');
-// }
 
-const defaultTask: Task = {
+const defaultTask: Tasks = {
     scripts: [],
     blocking: false,
     parallel: false
 };
 
-const defaultOptions: Options = {
-    onBeforeBuild: JSON.parse(JSON.stringify(defaultTask)),
-    onBuildStart: JSON.parse(JSON.stringify(defaultTask)),
-    onBuildEnd: JSON.parse(JSON.stringify(defaultTask)),
-    onBuildExit: JSON.parse(JSON.stringify(defaultTask)),
-    onBuildError: JSON.parse(JSON.stringify(defaultTask)),
-    env: {},
-    dev: true,
-    safe: false,
-    logging: true,
-    swallowError: false
-};
-
 export default class WebpackShellPlugin {
-    private options: Options;
+    private  onBeforeBuild: Tasks;
+    private onBuildStart: Tasks;
+    private onBuildEnd: Tasks;
+    private onBuildExit: Tasks;
+    private onBuildError: Tasks;
+    private env: any = {};
+    private dev: boolean = true;
+    private safe: boolean = false;
+    private logging: boolean = true;
+    private swallowError: boolean = false;
+
+    private validateEvent(tasks: Tasks|string|Function|undefined|null): Tasks {
+        if (!tasks) {
+            return  JSON.parse(JSON.stringify(defaultTask));
+        }
+        if (typeof tasks === 'string') {
+            return { scripts: tasks.split('&&'), blocking: false, parallel: false };
+        } else if (typeof tasks === 'function') {
+            return { scripts: [tasks], blocking: false, parallel: false };
+        }
+
+        return tasks;
+    }
 
     constructor(options: Options) {
-        this.options = this.validateInput(this.mergeOptions(options, defaultOptions));
-        if (this.options.verbose) {
+        if (options.verbose) {
             this.warn(`WebpackShellPlugin [${new Date()}]: Verbose is being deprecated, please remove.`);
+        }
+
+        this.onBeforeBuild = this.validateEvent(options.onBeforeBuild);
+        this.onBuildStart = this.validateEvent(options.onBuildStart);
+        this.onBuildEnd = this.validateEvent(options.onBuildEnd);
+        this.onBuildExit = this.validateEvent(options.onBuildExit);
+        this.onBuildError = this.validateEvent(options.onBuildError);
+
+        if (options.hasOwnProperty('env')) {
+            this.env = options.env;
+        }
+        if (options.dev !== undefined) {
+            this.dev = options.dev;
+        }
+        if (options.safe !== undefined) {
+            this.safe = options.safe;
+        }
+        if (options.logging !== undefined) {
+            this.logging = options.logging;
+        }
+        if (options.swallowError !== undefined) {
+            this.swallowError = options.swallowError;
         }
 
         this.onCompilation = this.onCompilation.bind(this);
@@ -51,7 +78,7 @@ export default class WebpackShellPlugin {
 
     private putsAsync(resolve: () => void) {
         return (error: Error, stdout: Readable, stderr: Readable) => {
-            if (error && !this.options.swallowError) {
+            if (error && !this.swallowError) {
                 throw error;
             }
             resolve();
@@ -59,12 +86,12 @@ export default class WebpackShellPlugin {
     }
 
     private puts(error: Error, stdout: Readable, stderr: Readable) {
-        if (error && !this.options.swallowError) {
+        if (error && !this.swallowError) {
             throw error;
         }
     }
 
-    private spreadStdoutAndStdErr(proc: ChildProcess) {
+    private static spreadStdoutAndStdErr(proc: ChildProcess) {
         if (!proc.stdout || !proc.stderr) return;
         proc.stdout.pipe(process.stdout);
         proc.stderr.pipe(process.stdout);
@@ -80,18 +107,18 @@ export default class WebpackShellPlugin {
     }
 
     private handleScript(script: string) {
-        if (os.platform() === 'win32' || this.options.safe) {
-            execSync(script, { maxBuffer: Number.MAX_SAFE_INTEGER, stdio: this.options.logging ? [0, 1, 2] : undefined });
+        if (os.platform() === 'win32' || this.safe) {
+            execSync(script, { maxBuffer: Number.MAX_SAFE_INTEGER, stdio: this.logging ? [0, 1, 2] : undefined });
         } else {
             const { command, args } = this.serializeScript(script);
             let env = Object.create(global.process.env);
-            env = Object.assign(env, this.options.env);
-            spawnSync(command, args, { stdio: this.options.logging ? 'inherit' : undefined, env });
+            env = Object.assign(env, this.env);
+            spawnSync(command, args, { stdio: this.logging ? 'inherit' : undefined, env });
         }
     }
 
-    private handleScriptAsync(script: string, blocking = false) {
-        if (os.platform() === 'win32' || this.options.safe) {
+    private handleScriptAsync(script: string) {
+        if (os.platform() === 'win32' || this.safe) {
             return new Promise((resolve) => {
                 // @ts-ignore
                 this.spreadStdoutAndStdErr(exec(script, this.putsAsync(resolve)));
@@ -103,57 +130,31 @@ export default class WebpackShellPlugin {
         return new Promise((resolve) => proc.on('close', this.putsAsync(resolve)));
     }
 
-    private async executeScripts(scripts: string[], parallel: boolean = false, blocking: boolean = false) {
+    private async executeScripts(scripts: Task[], parallel: boolean = false, blocking: boolean = false) {
         if (!scripts || scripts.length <= 0) {
             return;
         }
 
-        if (blocking && !parallel) {
-            for (let i = 0; i < scripts.length; i++) {
-                this.handleScript(scripts[i]);
+        if (blocking && parallel) {
+            throw new Error(`WebpackShellPlugin [${new Date()}]: Not supported`);
+        }
+
+        for (let i = 0; i < scripts.length; i++) {
+            const script: Task = scripts[i];
+            if (typeof script === 'function') {
+                // if(script instanceof Promise)
+                if (blocking) await script(); else script();
+                continue;
             }
-        } else if (!blocking && !parallel) {
-            for (let i = 0; i < scripts.length; i++) {
-                await this.handleScriptAsync(scripts[i]);
-            }
-        } else if (blocking && parallel) {
-            throw new Error('Not supported');
-        } else if (!blocking && parallel) {
-            for (let i = 0; i < scripts.length; i++) {
-                this.handleScriptAsync(scripts[i], blocking);
+            if (blocking) {
+                this.handleScript(script);
+            } else if (!blocking) {
+                if (parallel) this.handleScriptAsync(script); else await this.handleScriptAsync(script);
             }
         }
     }
 
-    private validateInput(options: Options): Options {
-        if (typeof options.onBeforeBuild === 'string') {
-            options.onBeforeBuild = { scripts: options.onBeforeBuild.split('&&') };
-        }
-        if (typeof options.onBuildStart === 'string') {
-            options.onBuildStart = { scripts: options.onBuildStart.split('&&') };
-        }
-        if (typeof options.onBuildEnd === 'string') {
-            options.onBuildEnd = { scripts: options.onBuildEnd.split('&&') };
-        }
-        if (typeof options.onBuildExit === 'string') {
-            options.onBuildExit = { scripts: options.onBuildExit.split('&&') };
-        }
-        if (typeof options.onBuildError === 'string') {
-            options.onBuildError = { scripts: options.onBuildError.split('&&') };
-        }
-        return options;
-    }
-
-    private mergeOptions(provided: Options, defaults: Options): Options {
-        const options: Options = {};
-        for (const key in defaults) {
-            // @ts-ignore
-            options[key] = JSON.parse(JSON.stringify(provided.hasOwnProperty(key) ? provided[key] : defaults[key]));
-        }
-        return options;
-    }
-
-    apply(compiler: webpack.Compiler) {
+    apply(compiler: webpack.Compiler): void {
         if (compiler.hooks) {
             compiler.hooks.invalid.tap('webpack-shell-plugin-next', this.onInvalid);
             compiler.hooks.compilation.tap('webpack-shell-plugin-next', this.onCompilation);
@@ -168,37 +169,34 @@ export default class WebpackShellPlugin {
     }
 
     private readonly onInvalid = async (compilation: string): Promise<void> => {
-        const onBeforeBuild = this.options.onBeforeBuild;
-        if (!onBeforeBuild || typeof onBeforeBuild === 'string') return;
+        const onBeforeBuild = this.onBeforeBuild;
         if (onBeforeBuild.scripts && onBeforeBuild.scripts.length) {
             this.log('Executing before build scripts');
             await this.executeScripts(onBeforeBuild.scripts, onBeforeBuild.parallel, onBeforeBuild.blocking);
-            if (this.options.dev) {
-                this.options.onBeforeBuild = JSON.parse(JSON.stringify(defaultTask));
+            if (this.dev) {
+                this.onBeforeBuild = JSON.parse(JSON.stringify(defaultTask));
             }
         }
     };
 
     private readonly onCompilation = async (compilation: webpack.compilation.Compilation): Promise<void> => {
-        const onBuildStartOption = this.options.onBuildStart;
-        if (!onBuildStartOption || typeof onBuildStartOption === 'string') return;
+        const onBuildStartOption = this.onBuildStart;
         if (onBuildStartOption.scripts && onBuildStartOption.scripts.length > 0) {
             this.log('Executing pre-build scripts');
             await this.executeScripts(onBuildStartOption.scripts, onBuildStartOption.parallel, onBuildStartOption.blocking);
-            if (this.options.dev) {
-                this.options.onBuildStart = JSON.parse(JSON.stringify(defaultTask));
+            if (this.dev) {
+                this.onBuildStart = JSON.parse(JSON.stringify(defaultTask));
             }
         }
     };
 
     private readonly onAfterEmit = async (compilation: webpack.compilation.Compilation, callback?: Function): Promise<void> => {
-        const onBuildEndOption = this.options.onBuildEnd;
-        if (!onBuildEndOption || typeof onBuildEndOption === 'string') return;
+        const onBuildEndOption = this.onBuildEnd;
         if (onBuildEndOption.scripts && onBuildEndOption.scripts.length > 0) {
             this.log('Executing post-build scripts');
             await this.executeScripts(onBuildEndOption.scripts, onBuildEndOption.parallel, onBuildEndOption.blocking);
-            if (this.options.dev) {
-                this.options.onBuildEnd = JSON.parse(JSON.stringify(defaultTask));
+            if (this.dev) {
+                this.onBuildEnd = JSON.parse(JSON.stringify(defaultTask));
             }
         }
         if (callback) {
@@ -208,26 +206,22 @@ export default class WebpackShellPlugin {
 
     private readonly onDone = async (compilation: webpack.Stats, callback?: Function): Promise<void> => {
         if (compilation.hasErrors()) {
-            const onBuildError = this.options.onBuildError;
-            if (onBuildError &&
-                typeof onBuildError !== 'string' &&
-                onBuildError.scripts &&
-                onBuildError.scripts.length > 0
-            ) {
+            const onBuildError = this.onBuildError;
+            if (onBuildError.scripts && onBuildError.scripts.length > 0) {
                 this.warn('Executing error scripts before exit');
                 await this.executeScripts(onBuildError.scripts, onBuildError.parallel, onBuildError.blocking);
+                if (this.dev) {
+                    this.onBuildError = JSON.parse(JSON.stringify(defaultTask));
+                }
             }
         }
-        const onBuildExitOption = this.options.onBuildExit;
-        if (!onBuildExitOption || typeof onBuildExitOption === 'string') {
-            if (callback) {
-                callback();
-            }
-            return;
-        }
-        if (onBuildExitOption.scripts && onBuildExitOption.scripts.length > 0) {
+        const onBuildExit = this.onBuildExit;
+        if (onBuildExit.scripts && onBuildExit.scripts.length > 0) {
             this.log('Executing additional scripts before exit');
-            await this.executeScripts(onBuildExitOption.scripts, onBuildExitOption.parallel, onBuildExitOption.blocking);
+            await this.executeScripts(onBuildExit.scripts, onBuildExit.parallel, onBuildExit.blocking);
+            if (this.dev) {
+                this.onBuildExit = JSON.parse(JSON.stringify(defaultTask));
+            }
         }
         if (callback) {
             callback();
@@ -235,12 +229,12 @@ export default class WebpackShellPlugin {
     };
 
     private log(text: string) {
-        if (this.options.logging) {
+        if (this.logging) {
             console.log(text);
         }
     }
     private warn(text: string) {
-        if (this.options.logging) {
+        if (this.logging) {
             console.warn(text);
         }
     }

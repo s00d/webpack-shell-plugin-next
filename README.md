@@ -20,9 +20,8 @@ In `webpack.config.js`:
 
 ```js
 const WebpackShellPluginNext = require('webpack-shell-plugin-next');
-
+...
 module.exports = {
-  ...
   ...
   plugins: [
     new WebpackShellPluginNext({
@@ -41,27 +40,28 @@ module.exports = {
   ...
 }
 ```
+**More example in webpack.config.ts**
 
 ### API
 * `onBeforeBuild`: array of scripts to execute before every build. 
 
-**Default: ```{scripts: [],blocking: false,parallel: false}```**
+***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
 * `onBuildError`: array of scripts to execute when there is an error during compilation.
 
-**Default: ```{scripts: [],blocking: false,parallel: false}```**
+***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
 * `onBuildStart`: configuration object for scripts that execute before a compilation. 
 
-**Default: ```{scripts: [],blocking: false,parallel: false}```**
+***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
 * `onBuildEnd`: configuration object for scripts that execute after files are emitted at the end of the compilation. 
 
-**Default: ```{scripts: [],blocking: false,parallel: false}```**
+***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
 * `onBuildExit`: configuration object for scripts that execute after webpack's process is complete. *Note: this event also fires in `webpack --watch` when webpack has finished updating the bundle.*
 
-**Default: ```{scripts: [],blocking: false,parallel: false}```**
+***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
 
 * `blocking (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit)`: block webpack until scripts finish execution.
@@ -80,6 +80,35 @@ module.exports = {
 } 
  ```
 
+### TypeScript
+
+This project is written in TypeScript, and type declarations are included. You can take advantage of this if your project's webpack configuration is also using TypeScript (e.g. webpack.config.ts and webpack.config.js).
+
+### Function in scripts 
+
+how to use functions in the queue?
+
+#### Example:
+```js
+{
+    scripts: [
+        // sync
+        () => {
+            console.log('run tTimeout 1');
+            setTimeout(() => console.log('end Timeout 1'), 1000);
+        },
+        () => new Promise((resolve, reject) => {
+            console.log('run async tTimeout');
+            setTimeout(() => {
+                console.log('end async tTimeout');
+                resolve();
+            }, 1000);
+        }),
+        // async
+    ],
+    blocking: true
+}
+```
 
 ### Developing
 
@@ -89,11 +118,13 @@ Make sure you lint your code by running `npm run lint` and you can build the lib
 
 I appreciate any feed back as well, Thanks for helping!
 
-### Contributions
-Pavel Kuzmin
-
 ## Change Log
 
+### 1.1.0
+```
+- add function to scripts
+- refactoring
+```
 ### 1.0.0
 ```
 - add ts

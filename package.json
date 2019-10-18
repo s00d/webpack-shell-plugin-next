@@ -1,6 +1,6 @@
 {
   "name": "webpack-shell-plugin-next",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Run shell commands before and after webpack builds",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "clean": "rimraf lib",
-    "test": "tsc && webpack --mode development",
+    "test": "webpack --mode development",
     "test:dev": "webpack-dev-server --progress",
     "prepublish": "npm run clean && npm run build",
     "prepare": "npm run build",
@@ -58,6 +58,7 @@
     "rimraf": "^3.0.0",
     "source-map": "^0.7.3",
     "style-loader": "^1.0.0",
+    "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
     "tslint-config-airbnb": "^5.11.2",
     "typescript": "^3.6.4",
