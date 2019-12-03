@@ -121,7 +121,7 @@ export default class WebpackShellPlugin {
         if (os.platform() === 'win32' || this.safe) {
             return new Promise((resolve) => {
                 // @ts-ignore
-                this.spreadStdoutAndStdErr(exec(script, this.putsAsync(resolve)));
+                WebpackShellPlugin.spreadStdoutAndStdErr(exec(script, this.putsAsync(resolve)));
             });
         }
 

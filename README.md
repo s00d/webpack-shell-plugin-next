@@ -132,3 +132,7 @@ I appreciate any feed back as well, Thanks for helping!
 - add logging, swallowError, dev
 ```
 
+## support
+
+[support project](https://www.paypal.me/s00d)
+
