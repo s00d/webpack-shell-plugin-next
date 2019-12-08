@@ -17,7 +17,7 @@ const defaultTask: Tasks = {
 };
 
 export default class WebpackShellPlugin {
-    private  onBeforeBuild: Tasks;
+    private onBeforeBuild: Tasks;
     private onBuildStart: Tasks;
     private onBuildEnd: Tasks;
     private onBuildExit: Tasks;
@@ -91,7 +91,7 @@ export default class WebpackShellPlugin {
         }
     }
 
-    private static spreadStdoutAndStdErr(proc: ChildProcess) {
+    private spreadStdoutAndStdErr(proc: ChildProcess) {
         if (!proc.stdout || !proc.stderr) return;
         proc.stdout.pipe(process.stdout);
         proc.stderr.pipe(process.stdout);
@@ -121,7 +121,7 @@ export default class WebpackShellPlugin {
         if (os.platform() === 'win32' || this.safe) {
             return new Promise((resolve) => {
                 // @ts-ignore
-                WebpackShellPlugin.spreadStdoutAndStdErr(exec(script, this.putsAsync(resolve)));
+                this.spreadStdoutAndStdErr(exec(script, this.putsAsync(resolve)));
             });
         }
 

@@ -1,4 +1,5 @@
 [![npm version](https://badge.fury.io/js/webpack-shell-plugin-next.svg)](https://badge.fury.io/js/webpack-shell-plugin-next)
+[![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.me/s00d)
 # Webpack Shell Plugin Next
 
 fix webpack 4 deprecated method. add typescript and other
@@ -117,22 +118,3 @@ If opening a pull request, create an issue describing a fix or feature. Have you
 Make sure you lint your code by running `npm run lint` and you can build the library by running `npm run build`.
 
 I appreciate any feed back as well, Thanks for helping!
-
-## Change Log
-
-### 1.1.0
-```
-- add function to scripts
-- refactoring
-```
-### 1.0.0
-```
-- add ts
-- add onBeforeBuild and onBuildExit
-- add logging, swallowError, dev
-```
-
-## support
-
-[support project](https://www.paypal.me/s00d)
-

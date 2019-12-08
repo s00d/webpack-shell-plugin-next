@@ -20,7 +20,7 @@ export default class WebpackShellPlugin {
     constructor(options: Options);
     private putsAsync;
     private puts;
-    private static spreadStdoutAndStdErr;
+    private spreadStdoutAndStdErr;
     private serializeScript;
     private handleScript;
     private handleScriptAsync;
