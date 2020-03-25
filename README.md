@@ -64,13 +64,13 @@ module.exports = {
 
 ***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
-* `watchRun`: configuration object for scripts that execute when webpack's run watch
+* `onWatchRun`: configuration object for scripts that execute when webpack's run watch
 
 ***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
 
-* `blocking (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, watchRun)`: block webpack until scripts finish execution.
-* `parallel (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, watchRun)`: execute scripts in parallel, otherwise execute scripts in the order in which they are specified in the scripts array.
+* `blocking (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: block webpack until scripts finish execution.
+* `parallel (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: execute scripts in parallel, otherwise execute scripts in the order in which they are specified in the scripts array.
 * `env`: Object with environment variables that will be applied to the executables **Default: { }**
 * `logging`:  show output for internal messages.  **Default: true**
 * `swallowError`: ignore script errors (useful in watch mode) **Default: false**
