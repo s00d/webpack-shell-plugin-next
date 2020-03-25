@@ -22,6 +22,8 @@ export declare type Options = {
     onBuildExit?: Tasks | string;
     /** Scripts to execute after Webpack's process Error. Defaults to []. */
     onBuildError?: Tasks | string;
+    /** Scripts to execute after onWatchRun. Defaults to []. */
+    onWatchRun?: Tasks | string;
     /**
      * Switch for development environments. This causes scripts to execute once.
      * Useful for running HMR on webpack-dev-server or webpack watch mode.

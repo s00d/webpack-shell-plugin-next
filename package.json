@@ -1,6 +1,6 @@
 {
   "name": "webpack-shell-plugin-next",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Run shell commands before and after webpack builds",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -8,8 +8,9 @@
     "lib"
   ],
   "scripts": {
-    "clean": "rimraf lib",
-    "test": "webpack --mode development",
+    "clean": "rimraf lib && rimraf dist",
+    "test": "webpack",
+    "test:watch": "webpack --watch",
     "test:dev": "webpack-dev-server --progress",
     "prepublish": "npm run clean && npm run build",
     "prepare": "npm run build",

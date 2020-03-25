@@ -22,6 +22,7 @@ export default class WebpackShellPlugin {
     private onBuildEnd: Tasks;
     private onBuildExit: Tasks;
     private onBuildError: Tasks;
+    private onWatchRun: Tasks;
     private env: any = {};
     private dev: boolean = true;
     private safe: boolean = false;
@@ -51,6 +52,7 @@ export default class WebpackShellPlugin {
         this.onBuildEnd = this.validateEvent(options.onBuildEnd);
         this.onBuildExit = this.validateEvent(options.onBuildExit);
         this.onBuildError = this.validateEvent(options.onBuildError);
+        this.onWatchRun = this.validateEvent(options.onWatchRun);
 
         if (options.hasOwnProperty('env')) {
             this.env = options.env;
@@ -143,7 +145,11 @@ export default class WebpackShellPlugin {
             const script: Task = scripts[i];
             if (typeof script === 'function') {
                 // if(script instanceof Promise)
-                if (blocking) await script(); else script();
+                if (blocking) {
+                    await script();
+                } else {
+                    script();
+                }
                 continue;
             }
             if (blocking) {
@@ -160,11 +166,13 @@ export default class WebpackShellPlugin {
             compiler.hooks.compilation.tap('webpack-shell-plugin-next', this.onCompilation);
             compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', this.onAfterEmit);
             compiler.hooks.done.tapAsync('webpack-shell-plugin-next', this.onDone);
+            compiler.hooks.watchRun.tapAsync('webpack-shell-plugin-next', this.watchRun);
         } else {
             compiler.plugin('invalid', this.onInvalid);
             compiler.plugin('compilation', this.onCompilation);
             compiler.plugin('after-emit', this.onAfterEmit);
             compiler.plugin('done', this.onDone);
+            compiler.plugin('watch-run', this.watchRun);
         }
     }
 
@@ -223,6 +231,21 @@ export default class WebpackShellPlugin {
                 this.onBuildExit = JSON.parse(JSON.stringify(defaultTask));
             }
         }
+        if (callback) {
+            callback();
+        }
+    };
+
+    private readonly watchRun = async (compiler: webpack.Compiler, callback?: Function): Promise<void> => {
+        const onWatchRun = this.onWatchRun;
+        if (onWatchRun.scripts && onWatchRun.scripts.length) {
+            this.log('Executing onWatchRun build scripts');
+            await this.executeScripts(onWatchRun.scripts, onWatchRun.parallel, onWatchRun.blocking);
+            if (this.dev) {
+                this.onWatchRun = JSON.parse(JSON.stringify(defaultTask));
+            }
+        }
+
         if (callback) {
             callback();
         }

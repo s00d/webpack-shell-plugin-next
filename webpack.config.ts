@@ -4,7 +4,7 @@ import WebpackShellPlugin from './src';
 import * as path from 'path';
 
 const config: webpack.Configuration = {
-    watch: false,
+    mode: 'development',
     entry: path.resolve(__dirname, 'test/entry.js'),
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -24,7 +24,10 @@ const config: webpack.Configuration = {
     plugins: [
         new WebpackShellPlugin({
             onBuildStart: {
-              scripts: ['echo "onBuildStart"', 'sleep 1'],
+              scripts: [
+                'echo "onBuildStart"',
+                'sleep 1'
+              ],
               blocking: true,
               parallel: false
             },
@@ -68,6 +71,7 @@ const config: webpack.Configuration = {
                     'echo "wait sleep 2"',
                     'sleep 2',
                     'node ./test/exit-code-1.js',
+                    'node ./test/big_data.js',
                     'echo "wait sleep 2"',
                     'sleep 2',
                     'echo "end onBuildExit"',
@@ -76,9 +80,14 @@ const config: webpack.Configuration = {
                 parallel: false
             },
             onBuildError: {
-              scripts: ['echo "Webpack ERROR"'],
-              parallel: false,
-              blocking: true,
+                scripts: ['echo "Webpack ERROR"'],
+                parallel: false,
+                blocking: true,
+            },
+            onWatchRun: {
+                scripts: ['echo "Webpack onWatchRun"'],
+                parallel: false,
+                blocking: true,
             },
             dev: true,
             safe: false,
