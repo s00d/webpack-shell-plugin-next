@@ -23,6 +23,7 @@ export default class WebpackShellPlugin {
     private onBuildExit: Tasks;
     private onBuildError: Tasks;
     private onWatchRun: Tasks;
+    private onDoneWatch: Tasks;
     private env: any = {};
     private dev: boolean = true;
     private safe: boolean = false;
@@ -53,8 +54,9 @@ export default class WebpackShellPlugin {
         this.onBuildExit = this.validateEvent(options.onBuildExit);
         this.onBuildError = this.validateEvent(options.onBuildError);
         this.onWatchRun = this.validateEvent(options.onWatchRun);
+        this.onDoneWatch = this.validateEvent(options.onDoneWatch);
 
-        if (options.hasOwnProperty('env')) {
+        if (options.env !== undefined) {
             this.env = options.env;
         }
         if (options.dev !== undefined) {
@@ -166,15 +168,31 @@ export default class WebpackShellPlugin {
             compiler.hooks.compilation.tap('webpack-shell-plugin-next', this.onCompilation);
             compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', this.onAfterEmit);
             compiler.hooks.done.tapAsync('webpack-shell-plugin-next', this.onDone);
+            compiler.hooks.afterCompile.tapAsync('webpack-shell-plugin-next', this.afterCompile);
             compiler.hooks.watchRun.tapAsync('webpack-shell-plugin-next', this.watchRun);
         } else {
             compiler.plugin('invalid', this.onInvalid);
             compiler.plugin('compilation', this.onCompilation);
             compiler.plugin('after-emit', this.onAfterEmit);
             compiler.plugin('done', this.onDone);
+            compiler.plugin('after-compile', this.afterCompile);
             compiler.plugin('watch-run', this.watchRun);
         }
     }
+
+    private readonly afterCompile = async (compilation: webpack.compilation.Compilation, callback?: Function): Promise<void> => {
+        const onDoneWatch = this.onDoneWatch;
+        if (onDoneWatch.scripts && onDoneWatch.scripts.length > 0) {
+            this.log('Executing additional scripts before exit');
+            await this.executeScripts(onDoneWatch.scripts, onDoneWatch.parallel, onDoneWatch.blocking);
+            if (this.dev) {
+                this.onBuildExit = JSON.parse(JSON.stringify(defaultTask));
+            }
+        }
+        if (callback) {
+            callback();
+        }
+    };
 
     private readonly onInvalid = async (compilation: string): Promise<void> => {
         const onBeforeBuild = this.onBeforeBuild;

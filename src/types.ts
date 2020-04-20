@@ -13,23 +13,21 @@ export type Script = {
 export type Options = {
     /** Scripts to execute on the before build. Defaults to []. */
     onBeforeBuild?: Tasks|string
-
     /** Scripts to execute on the initial build. Defaults to []. */
     onBuildStart?: Tasks|string
-
     /**
      * Scripts to execute after files are emitted at the end of the
      * compilation. Defaults to [].
      */
     onBuildEnd?: Tasks|string
-
     /** Scripts to execute after Webpack's process completes. Defaults to []. */
     onBuildExit?: Tasks|string
-
     /** Scripts to execute after Webpack's process Error. Defaults to []. */
     onBuildError?: Tasks|string
     /** Scripts to execute after onWatchRun. Defaults to []. */
     onWatchRun?: Tasks|string
+    /** Scripts to execute after files are emitted at the end with watch. Defaults to []. */
+    onDoneWatch?: Tasks|string
 
     /**
      * Switch for development environments. This causes scripts to execute once.

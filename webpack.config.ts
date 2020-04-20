@@ -89,6 +89,11 @@ const config: webpack.Configuration = {
                 parallel: false,
                 blocking: true,
             },
+            onDoneWatch: {
+                scripts: ['echo "Webpack onDoneWatch"'],
+                parallel: false,
+                blocking: true,
+            },
             dev: true,
             safe: false,
             logging: true

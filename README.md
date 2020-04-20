@@ -68,6 +68,9 @@ module.exports = {
 
 ***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
+* `onDoneWatch`: configuration object for scripts that execute after files are emitted at the end of the compilation with watch. 
+
+***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
 * `blocking (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: block webpack until scripts finish execution.
 * `parallel (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: execute scripts in parallel, otherwise execute scripts in the order in which they are specified in the scripts array.
