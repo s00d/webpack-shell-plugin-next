@@ -17,6 +17,7 @@ const defaultTask: Tasks = {
 };
 
 export default class WebpackShellPlugin {
+    private onBeforeNormalRun: Tasks;
     private onBeforeBuild: Tasks;
     private onBuildStart: Tasks;
     private onBuildEnd: Tasks;
@@ -49,6 +50,7 @@ export default class WebpackShellPlugin {
         }
 
         this.onBeforeBuild = this.validateEvent(options.onBeforeBuild);
+        this.onBeforeNormalRun = this.validateEvent(options.onBeforeNormalRun);
         this.onBuildStart = this.validateEvent(options.onBuildStart);
         this.onBuildEnd = this.validateEvent(options.onBuildEnd);
         this.onBuildExit = this.validateEvent(options.onBuildExit);
@@ -73,6 +75,7 @@ export default class WebpackShellPlugin {
         }
 
         this.onCompilation = this.onCompilation.bind(this);
+        this.onBeforeRun = this.onBeforeRun.bind(this);
         this.onAfterEmit = this.onAfterEmit.bind(this);
         this.onDone = this.onDone.bind(this);
         this.onInvalid = this.onInvalid.bind(this);
@@ -164,6 +167,7 @@ export default class WebpackShellPlugin {
 
     apply(compiler: webpack.Compiler): void {
         if (compiler.hooks) {
+            compiler.hooks.beforeRun.tapAsync('webpack-shell-plugin-next', this.onBeforeRun);
             compiler.hooks.invalid.tap('webpack-shell-plugin-next', this.onInvalid);
             compiler.hooks.compilation.tap('webpack-shell-plugin-next', this.onCompilation);
             compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', this.onAfterEmit);
@@ -171,12 +175,27 @@ export default class WebpackShellPlugin {
             compiler.hooks.afterCompile.tapAsync('webpack-shell-plugin-next', this.afterCompile);
             compiler.hooks.watchRun.tapAsync('webpack-shell-plugin-next', this.watchRun);
         } else {
+            compiler.plugin('before-run', this.onBeforeRun);
             compiler.plugin('invalid', this.onInvalid);
             compiler.plugin('compilation', this.onCompilation);
             compiler.plugin('after-emit', this.onAfterEmit);
             compiler.plugin('done', this.onDone);
             compiler.plugin('after-compile', this.afterCompile);
             compiler.plugin('watch-run', this.watchRun);
+        }
+    }
+
+    private readonly onBeforeRun = async (compiler: webpack.Compiler, callback?: Function): Promise<void> => {
+        const onBeforeNormalRun = this.onBeforeNormalRun;
+        if (onBeforeNormalRun.scripts && onBeforeNormalRun.scripts.length > 0) {
+            this.log('Executing pre-run scripts');
+            await this.executeScripts(onBeforeNormalRun.scripts, onBeforeNormalRun.parallel, onBeforeNormalRun.blocking);
+            if (this.dev) {
+                this.onDoneWatch = JSON.parse(JSON.stringify(defaultTask));
+            }
+        }
+        if (callback) {
+            callback();
         }
     }
 

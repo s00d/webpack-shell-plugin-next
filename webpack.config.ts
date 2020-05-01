@@ -23,6 +23,14 @@ const config: webpack.Configuration = {
     },
     plugins: [
         new WebpackShellPlugin({
+            onBeforeNormalRun: {
+              scripts: [
+                'echo "onBeforeRun"',
+                'sleep 1'
+              ],
+              blocking: true,
+              parallel: false
+            },
             onBuildStart: {
               scripts: [
                 'echo "onBuildStart"',
@@ -94,7 +102,7 @@ const config: webpack.Configuration = {
                 parallel: false,
                 blocking: true,
             },
-            dev: true,
+            dev: false,
             safe: false,
             logging: true
         }),
