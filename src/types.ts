@@ -11,6 +11,8 @@ export type Script = {
 };
 
 export type Options = {
+    /** Scripts to execute before normal run (without --watch). Defaults to []. */
+    onBeforeNormalRun?: Tasks|string
     /** Scripts to execute on the before build. Defaults to []. */
     onBeforeBuild?: Tasks|string
     /** Scripts to execute on the initial build. Defaults to []. */

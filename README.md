@@ -72,6 +72,10 @@ module.exports = {
 
 ***Default: ```{scripts: [],blocking: false,parallel: false}```***
 
+* `onBeforeNormalRun`: configuration object for scripts that execute on normal run without --watch option
+
+***Default: ```{scripts: [],blocking: false,parallel: false}```***
+
 * `blocking (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: block webpack until scripts finish execution.
 * `parallel (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: execute scripts in parallel, otherwise execute scripts in the order in which they are specified in the scripts array.
 * `env`: Object with environment variables that will be applied to the executables **Default: { }**
