@@ -2,7 +2,9 @@
 [![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.me/s00d)
 # Webpack Shell Plugin Next
 
-This plugin allows you to run any shell commands before or after webpack 4 builds. This will work for both webpack 4.
+fix webpack deprecated method. add typescript and other
+
+This plugin allows you to run any shell commands before or after webpack 5 builds. This will work for both webpack 5.
 
 Goes great with running cron jobs, reporting tools, or tests such as selenium, protractor, phantom, ect.
 
