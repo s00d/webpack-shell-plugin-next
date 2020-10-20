@@ -166,23 +166,13 @@ export default class WebpackShellPlugin {
     }
 
     apply(compiler: webpack.Compiler): void {
-        if (compiler.hooks) {
-            compiler.hooks.beforeRun.tapAsync('webpack-shell-plugin-next', this.onBeforeRun);
-            compiler.hooks.invalid.tap('webpack-shell-plugin-next', this.onInvalid);
-            compiler.hooks.compilation.tap('webpack-shell-plugin-next', this.onCompilation);
-            compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', this.onAfterEmit);
-            compiler.hooks.done.tapAsync('webpack-shell-plugin-next', this.onDone);
-            compiler.hooks.afterCompile.tapAsync('webpack-shell-plugin-next', this.afterCompile);
-            compiler.hooks.watchRun.tapAsync('webpack-shell-plugin-next', this.watchRun);
-        } else {
-            compiler.plugin('before-run', this.onBeforeRun);
-            compiler.plugin('invalid', this.onInvalid);
-            compiler.plugin('compilation', this.onCompilation);
-            compiler.plugin('after-emit', this.onAfterEmit);
-            compiler.plugin('done', this.onDone);
-            compiler.plugin('after-compile', this.afterCompile);
-            compiler.plugin('watch-run', this.watchRun);
-        }
+        compiler.hooks.beforeRun.tapAsync('webpack-shell-plugin-next', this.onBeforeRun);
+        compiler.hooks.invalid.tap('webpack-shell-plugin-next', this.onInvalid);
+        compiler.hooks.compilation.tap('webpack-shell-plugin-next', this.onCompilation);
+        compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', this.onAfterEmit);
+        compiler.hooks.done.tapAsync('webpack-shell-plugin-next', this.onDone);
+        compiler.hooks.afterCompile.tapAsync('webpack-shell-plugin-next', this.afterCompile);
+        compiler.hooks.watchRun.tapAsync('webpack-shell-plugin-next', this.watchRun);
     }
 
     private readonly onBeforeRun = async (compiler: webpack.Compiler, callback?: Function): Promise<void> => {
@@ -199,7 +189,7 @@ export default class WebpackShellPlugin {
         }
     }
 
-    private readonly afterCompile = async (compilation: webpack.compilation.Compilation, callback?: Function): Promise<void> => {
+    private readonly afterCompile = async (compilation: webpack.Compilation, callback?: Function): Promise<void> => {
         const onDoneWatch = this.onDoneWatch;
         if (onDoneWatch.scripts && onDoneWatch.scripts.length > 0) {
             this.log('Executing additional scripts before exit');
@@ -224,7 +214,7 @@ export default class WebpackShellPlugin {
         }
     };
 
-    private readonly onCompilation = async (compilation: webpack.compilation.Compilation): Promise<void> => {
+    private readonly onCompilation = async (compilation: webpack.Compilation): Promise<void> => {
         const onBuildStartOption = this.onBuildStart;
         if (onBuildStartOption.scripts && onBuildStartOption.scripts.length > 0) {
             this.log('Executing pre-build scripts');
@@ -235,7 +225,7 @@ export default class WebpackShellPlugin {
         }
     };
 
-    private readonly onAfterEmit = async (compilation: webpack.compilation.Compilation, callback?: Function): Promise<void> => {
+    private readonly onAfterEmit = async (compilation: webpack.Compilation, callback?: Function): Promise<void> => {
         const onBuildEndOption = this.onBuildEnd;
         if (onBuildEndOption.scripts && onBuildEndOption.scripts.length > 0) {
             this.log('Executing post-build scripts');
