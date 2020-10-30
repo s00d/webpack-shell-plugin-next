@@ -102,6 +102,11 @@ const config: webpack.Configuration = {
                 parallel: false,
                 blocking: true,
             },
+            onAfterDone: {
+                scripts: ['echo "Webpack onAfterDone"'],
+                parallel: false,
+                blocking: true,
+            },
             dev: false,
             safe: false,
             logging: true

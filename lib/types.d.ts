@@ -28,6 +28,8 @@ export declare type Options = {
     onWatchRun?: Tasks | string;
     /** Scripts to execute after files are emitted at the end with watch. Defaults to []. */
     onDoneWatch?: Tasks | string;
+    /** Scripts to execute after done. Defaults to []. */
+    onAfterDone?: Tasks | string;
     /**
      * Switch for development environments. This causes scripts to execute once.
      * Useful for running HMR on webpack-dev-server or webpack watch mode.

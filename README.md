@@ -52,36 +52,16 @@ module.exports = {
 
 ### API
 * `onBeforeBuild`: array of scripts to execute before every build. 
-
-***Default: ```{scripts: [],blocking: false,parallel: false}```***
-
 * `onBuildError`: array of scripts to execute when there is an error during compilation.
-
-***Default: ```{scripts: [],blocking: false,parallel: false}```***
-
 * `onBuildStart`: configuration object for scripts that execute before a compilation. 
-
-***Default: ```{scripts: [],blocking: false,parallel: false}```***
-
 * `onBuildEnd`: configuration object for scripts that execute after files are emitted at the end of the compilation. 
-
-***Default: ```{scripts: [],blocking: false,parallel: false}```***
-
 * `onBuildExit`: configuration object for scripts that execute after webpack's process is complete. *Note: this event also fires in `webpack --watch` when webpack has finished updating the bundle.*
-
-***Default: ```{scripts: [],blocking: false,parallel: false}```***
-
 * `onWatchRun`: configuration object for scripts that execute when webpack's run watch
-
-***Default: ```{scripts: [],blocking: false,parallel: false}```***
-
 * `onDoneWatch`: configuration object for scripts that execute after files are emitted at the end of the compilation with watch. 
-
-***Default: ```{scripts: [],blocking: false,parallel: false}```***
-
 * `onBeforeNormalRun`: configuration object for scripts that execute on normal run without --watch option
+* `onAfterDone`: configuration object for scripts that execute after done. 
 
-***Default: ```{scripts: [],blocking: false,parallel: false}```***
+***Default for all: ```{scripts: [],blocking: false,parallel: false}```***
 
 * `blocking (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: block webpack until scripts finish execution.
 * `parallel (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: execute scripts in parallel, otherwise execute scripts in the order in which they are specified in the scripts array.

@@ -14,6 +14,7 @@ export default class WebpackShellPlugin {
     private onBuildError;
     private onWatchRun;
     private onDoneWatch;
+    private onAfterDone;
     private env;
     private dev;
     private safe;
@@ -30,6 +31,7 @@ export default class WebpackShellPlugin {
     private executeScripts;
     apply(compiler: webpack.Compiler): void;
     private readonly onBeforeRun;
+    private readonly afterDone;
     private readonly afterCompile;
     private readonly onInvalid;
     private readonly onCompilation;

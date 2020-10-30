@@ -25,6 +25,7 @@ export default class WebpackShellPlugin {
     private onBuildError: Tasks;
     private onWatchRun: Tasks;
     private onDoneWatch: Tasks;
+    private onAfterDone: Tasks;
     private env: any = {};
     private dev: boolean = true;
     private safe: boolean = false;
@@ -57,6 +58,7 @@ export default class WebpackShellPlugin {
         this.onBuildError = this.validateEvent(options.onBuildError);
         this.onWatchRun = this.validateEvent(options.onWatchRun);
         this.onDoneWatch = this.validateEvent(options.onDoneWatch);
+        this.onAfterDone = this.validateEvent(options.onAfterDone);
 
         if (options.env !== undefined) {
             this.env = options.env;
@@ -172,6 +174,7 @@ export default class WebpackShellPlugin {
         compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', this.onAfterEmit);
         compiler.hooks.done.tapAsync('webpack-shell-plugin-next', this.onDone);
         compiler.hooks.afterCompile.tapAsync('webpack-shell-plugin-next', this.afterCompile);
+        compiler.hooks.afterDone.tap('webpack-shell-plugin-next', this.afterDone);
         compiler.hooks.watchRun.tapAsync('webpack-shell-plugin-next', this.watchRun);
     }
 
@@ -186,6 +189,17 @@ export default class WebpackShellPlugin {
         }
         if (callback) {
             callback();
+        }
+    }
+
+    private readonly afterDone = async (): Promise<void> => {
+        const onAfterDone = this.onAfterDone;
+        if (onAfterDone.scripts && onAfterDone.scripts.length > 0) {
+            this.log('Executing additional scripts before exit');
+            await this.executeScripts(onAfterDone.scripts, onAfterDone.parallel, onAfterDone.blocking);
+            if (this.dev) {
+                this.onBuildExit = JSON.parse(JSON.stringify(defaultTask));
+            }
         }
     }
 
