@@ -80,6 +80,7 @@ export default class WebpackShellPlugin {
         this.onBeforeRun = this.onBeforeRun.bind(this);
         this.onAfterEmit = this.onAfterEmit.bind(this);
         this.onDone = this.onDone.bind(this);
+        this.afterDone = this.afterDone.bind(this);
         this.onInvalid = this.onInvalid.bind(this);
         this.putsAsync = this.putsAsync.bind(this);
         this.puts = this.puts.bind(this);
