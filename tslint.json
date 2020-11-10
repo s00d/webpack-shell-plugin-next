@@ -2,6 +2,12 @@
   "extends": [
     "tslint-config-airbnb"
   ],
+  "linterOptions": {
+    "exclude": [
+      "bin/**/*",
+      "lib/**/*"
+    ]
+  },
   "rules": {
     "typedef": [
       false,

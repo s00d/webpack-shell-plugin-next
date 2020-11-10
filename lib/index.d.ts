@@ -3,8 +3,8 @@
  * @extends Object
  * Run shell commands before and after webpack builds
  */
-import { Options } from './types'
-import * as webpack from 'webpack'
+import { Options } from './types';
+import * as webpack from 'webpack';
 export default class WebpackShellPlugin {
     private onBeforeNormalRun;
     private onBeforeBuild;

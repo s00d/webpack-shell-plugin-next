@@ -1,11 +1,13 @@
-sudo: false
-
 language: node_js
+
+os: linux
+
+dist: xenial
 
 node_js:
 - 15
 - lts/*
-- 12
+- node
 
 before_install:
   - npm install -g npm

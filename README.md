@@ -1,7 +1,10 @@
 [![npm version](https://badge.fury.io/js/webpack-shell-plugin-next.svg)](https://badge.fury.io/js/webpack-shell-plugin-next)
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
+![npm downloads](https://img.shields.io/npm/dw/webpack-shell-plugin-next)
+![NPM license](https://img.shields.io/npm/l/webpack-shell-plugin-next)
+![npm type definitions](https://img.shields.io/npm/types/webpack-shell-plugin-next)
 [![Build Status](https://travis-ci.org/s00d/webpack-shell-plugin-next.svg?branch=master)](https://travis-ci.org/s00d/webpack-shell-plugin-next)
 [![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.me/s00d)
+![GitHub Repo stars](https://img.shields.io/github/stars/s00d/webpack-shell-plugin-next?style=social)
 # Webpack Shell Plugin Next
 
 fix webpack deprecated method. add typescript and other
