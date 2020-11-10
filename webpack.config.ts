@@ -10,6 +10,9 @@ const config: webpack.Configuration = {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js'
     },
+    watchOptions: {
+        ignored: ['node_modules/**'],
+    },
     module: {
         noParse: /node_modules\/json-schema\/lib\/validate\.js/,
         rules: [

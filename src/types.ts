@@ -12,26 +12,26 @@ export type Script = {
 
 export type Options = {
     /** Scripts to execute before normal run (without --watch). Defaults to []. */
-    onBeforeNormalRun?: Tasks|string
+    onBeforeNormalRun?: Tasks|string|Function
     /** Scripts to execute on the before build. Defaults to []. */
-    onBeforeBuild?: Tasks|string
+    onBeforeBuild?: Tasks|string|Function
     /** Scripts to execute on the initial build. Defaults to []. */
-    onBuildStart?: Tasks|string
+    onBuildStart?: Tasks|string|Function
     /**
      * Scripts to execute after files are emitted at the end of the
      * compilation. Defaults to [].
      */
-    onBuildEnd?: Tasks|string
+    onBuildEnd?: Tasks|string|Function
     /** Scripts to execute after Webpack's process completes. Defaults to []. */
-    onBuildExit?: Tasks|string
+    onBuildExit?: Tasks|string|Function
     /** Scripts to execute after Webpack's process Error. Defaults to []. */
-    onBuildError?: Tasks|string
+    onBuildError?: Tasks|string|Function
     /** Scripts to execute after onWatchRun. Defaults to []. */
-    onWatchRun?: Tasks|string
+    onWatchRun?: Tasks|string|Function
     /** Scripts to execute after files are emitted at the end with watch. Defaults to []. */
-    onDoneWatch?: Tasks|string
+    onDoneWatch?: Tasks|string|Function
     /** Scripts to execute after done. Defaults to []. */
-    onAfterDone?: Tasks|string
+    onAfterDone?: Tasks|string|Function
 
     /**
      * Switch for development environments. This causes scripts to execute once.
