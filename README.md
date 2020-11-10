@@ -1,4 +1,6 @@
 [![npm version](https://badge.fury.io/js/webpack-shell-plugin-next.svg)](https://badge.fury.io/js/webpack-shell-plugin-next)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
+[![Build Status](https://travis-ci.org/s00d/webpack-shell-plugin-next.svg?branch=master)](https://travis-ci.org/s00d/webpack-shell-plugin-next)
 [![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.me/s00d)
 # Webpack Shell Plugin Next
 

@@ -1,6 +1,6 @@
 {
   "name": "webpack-shell-plugin-next",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Run shell commands before and after webpack builds",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -19,8 +19,13 @@
     "webpack": "webpack --progress --mode production",
     "webpack-dev-server": "webpack-dev-server --progress",
     "lint": "tslint --project tsconfig.json ./src/*.ts",
-    "lint:fix": "npm run lint -- --fix"
+    "lint:fix": "npm run lint -- --fix",
+    "standardx:fix": " standardx src/*.ts --fix"
   },
+  "pre-commit": [
+    "test",
+    "lint"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/s00d/webpack-shell-plugin-next.git"
@@ -48,21 +53,32 @@
     "@types/node": "^14.14.7",
     "@types/rimraf": "^3.0.0",
     "@types/source-map": "^0.5.7",
+    "@typescript-eslint/eslint-plugin": "^4.7.0",
+    "@typescript-eslint/parser": "^4.7.0",
     "css-loader": "^5.0.1",
+    "eslint": "^7.13.0",
     "jest": "^26.6.3",
     "module-alias": "^2.2.2",
     "rimraf": "^3.0.2",
     "source-map": "^0.7.3",
+    "standardx": "^7.0.0",
     "style-loader": "^2.0.0",
     "ts-jest": "^26.4.4",
     "ts-node": "^9.0.0",
     "tslint": "^5.20.1",
     "tslint-config-airbnb": "^5.11.2",
+    "tslint-config-standard": "^9.0.0",
     "typescript": "^4.0.5",
     "webpack": "^5.4.0",
     "webpack-cli": "^4.2.0"
   },
   "peerDependencies": {
     "webpack": ">=5.0.0"
+  },
+  "standardx": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint/eslint-plugin"
+    ]
   }
 }

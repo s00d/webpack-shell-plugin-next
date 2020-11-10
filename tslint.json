@@ -30,7 +30,7 @@
     "prefer-template": true,
     "semicolon": [
       true,
-      "always",
+      "never",
       "ignore-bound-class-methods"
     ],
     "ter-arrow-parens": [

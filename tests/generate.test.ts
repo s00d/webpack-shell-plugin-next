@@ -1,18 +1,18 @@
-import path from 'path';
-import WebpackShellPlugin from '../src/index';
-import Webpack from 'webpack';
-import rimraf from 'rimraf';
-import fs from 'fs';
+import path from 'path'
+import WebpackShellPlugin from '../src/index'
+import Webpack from 'webpack'
+import rimraf from 'rimraf'
+import fs from 'fs'
 
-console.log = (data: any) => {};
+console.log = (data: any) => {}
 
 beforeEach(() => {
-  return rimraf.sync(path.resolve(__dirname, 'out'));
-});
+  return rimraf.sync(path.resolve(__dirname, 'out'))
+})
 
 afterEach(() => {
-  return rimraf.sync(path.resolve(__dirname, 'out'));
-});
+  return rimraf.sync(path.resolve(__dirname, 'out'))
+})
 
 it('Supports an entry', () => {
   expect(() => {
@@ -31,12 +31,12 @@ it('Supports an entry', () => {
             ],
             blocking: true,
             parallel: false
-          },
+          }
         })
       ]
-    });
-  }).not.toThrow();
-});
+    })
+  }).not.toThrow()
+})
 
 it('Check scripts exec', (done) => {
   Webpack({
@@ -49,17 +49,17 @@ it('Check scripts exec', (done) => {
       new WebpackShellPlugin({
         onBuildExit: {
           scripts: [
-            'node ./tests/scripts/big_data.js',
+            'node ./tests/scripts/big_data.js'
           ],
           blocking: true,
           parallel: false
-        },
+        }
       })
     ]
   }, (error, stats) => {
-    done();
-  });
-});
+    done()
+  })
+})
 
 it('Check scripts exit code', (done) => {
   Webpack({
@@ -72,17 +72,17 @@ it('Check scripts exit code', (done) => {
       new WebpackShellPlugin({
         onBuildExit: {
           scripts: [
-            'node ./tests/scripts/exit-code-1.js',
+            'node ./tests/scripts/exit-code-1.js'
           ],
           blocking: true,
           parallel: false
-        },
+        }
       })
     ]
   }, (error, stats) => {
-    done();
-  });
-});
+    done()
+  })
+})
 
 it('Check scripts with file', (done) => {
   Webpack({
@@ -95,18 +95,18 @@ it('Check scripts with file', (done) => {
       new WebpackShellPlugin({
         onBuildExit: {
           scripts: [
-            'node ./tests/scripts/file.js',
+            'node ./tests/scripts/file.js'
           ],
           blocking: true,
           parallel: false
-        },
+        }
       })
     ]
   }, (error, stats) => {
-    expect(fs.existsSync(path.join(__dirname, './out/test.txt'))).toBe(true);
-    done();
-  });
-});
+    expect(fs.existsSync(path.join(__dirname, './out/test.txt'))).toBe(true)
+    done()
+  })
+})
 
 it('Check scripts run', (done) => {
   Webpack({
@@ -120,34 +120,34 @@ it('Check scripts run', (done) => {
         onBuildExit: {
           scripts: [
             () => new Promise((resolve, reject) => {
-              fs.writeFileSync(path.join(__dirname, './out/run.txt'), 'Hey there!');
-              resolve();
+              fs.writeFileSync(path.join(__dirname, './out/run.txt'), 'Hey there!')
+              resolve()
             })
           ],
           blocking: true,
           parallel: false
-        },
+        }
       })
     ]
   }, (error, stats) => {
-    expect(fs.existsSync(path.join(__dirname, './out/run.txt'))).toBe(true);
-    expect(fs.existsSync(path.join(__dirname, './out/bundle.js'))).toBe(true);
-    done();
-  });
-});
+    expect(fs.existsSync(path.join(__dirname, './out/run.txt'))).toBe(true)
+    expect(fs.existsSync(path.join(__dirname, './out/bundle.js'))).toBe(true)
+    done()
+  })
+})
 
 describe('testEvents', () => {
   const error = {
     name: 'errorName',
     message: 'errorMessage'
-  };
-  let consoleOutput: Array<string> = [];
-  const mockedLog = (output: string) => consoleOutput.push(output);
-  beforeEach(() => (consoleOutput = []));
-  afterEach(() => (consoleOutput = []));
+  }
+  let consoleOutput: Array<string> = []
+  const mockedLog = (output: string) => consoleOutput.push(output)
+  beforeEach(() => (consoleOutput = []))
+  afterEach(() => (consoleOutput = []))
 
   it('work test', (done) => {
-    consoleOutput = [];
+    consoleOutput = []
     Webpack({
       entry: path.resolve(__dirname, './webpack/index.js'),
       output: {
@@ -159,25 +159,25 @@ describe('testEvents', () => {
           onBuildExit: {
             scripts: [
               () => new Promise((resolve, reject) => {
-                mockedLog('test 1');
-                resolve();
+                mockedLog('test 1')
+                resolve()
               })
             ],
             blocking: true,
             parallel: false
-          },
+          }
         })
       ]
     }, (error, stats) => {
       expect(consoleOutput).toEqual([
         'test 1'
-      ]);
-      done();
-    });
-  });
+      ])
+      done()
+    })
+  })
 
   it('test queue', (done) => {
-    consoleOutput = [];
+    consoleOutput = []
     Webpack({
       entry: path.resolve(__dirname, './webpack/index.js'),
       output: {
@@ -194,7 +194,7 @@ describe('testEvents', () => {
           onBuildError: () => mockedLog('onBuildError'),
           onWatchRun: () => mockedLog('onWatchRun'),
           onDoneWatch: () => mockedLog('onDoneWatch'),
-          onAfterDone: () => mockedLog('onAfterDone'),
+          onAfterDone: () => mockedLog('onAfterDone')
         })
       ]
     }, (error, stats) => {
@@ -204,11 +204,10 @@ describe('testEvents', () => {
           'onBuildStart',
           'onBuildEnd',
           'onBuildExit',
-          'onAfterDone',
-        ]);
-        done();
-      }, 100);
-
-    });
-  });
-});
+          'onAfterDone'
+        ])
+        done()
+      }, 100)
+    })
+  })
+})
