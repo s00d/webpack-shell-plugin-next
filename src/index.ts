@@ -4,9 +4,8 @@
  * Run shell commands before and after webpack builds
  */
 
-import { spawn, exec, spawnSync, execSync, ChildProcess } from 'child_process'
+import { spawn, exec, spawnSync, execSync, ChildProcess, ExecException } from 'child_process'
 import { Options, Script, Tasks, Task } from './types'
-import * as os from 'os'
 import * as webpack from 'webpack'
 import { Readable } from 'stream'
 
@@ -86,12 +85,12 @@ export default class WebpackShellPlugin {
     this.puts = this.puts.bind(this)
   }
 
-  private putsAsync (resolve: () => void) {
-    return (error: Error, stdout: Readable, stderr: Readable) => {
+  private putsAsync (resolve: (val: any) => void) {
+    return (error: ExecException | null, stdout: string, stderr: string) => {
       if (error && !this.swallowError) {
         throw error
       }
-      resolve()
+      resolve(error)
     }
   }
 
@@ -117,20 +116,19 @@ export default class WebpackShellPlugin {
   }
 
   private handleScript (script: string) {
-    if (os.platform() === 'win32' || this.safe) {
-      execSync(script, { maxBuffer: Number.MAX_SAFE_INTEGER, stdio: this.logging ? [0, 1, 2] : undefined })
-    } else {
-      const { command, args } = this.serializeScript(script)
-      let env = Object.create(global.process.env)
-      env = Object.assign(env, this.env)
-      spawnSync(command, args, { stdio: this.logging ? 'inherit' : undefined, env })
+    if (this.safe) {
+      return execSync(script, { maxBuffer: Number.MAX_SAFE_INTEGER, stdio: this.logging ? [0, 1, 2] : undefined })
     }
+
+    const { command, args } = this.serializeScript(script)
+    let env = Object.create(global.process.env)
+    env = Object.assign(env, this.env)
+    return spawnSync(command, args, { stdio: this.logging ? 'inherit' : undefined, env })
   }
 
   private handleScriptAsync (script: string) {
-    if (os.platform() === 'win32' || this.safe) {
+    if (this.safe) {
       return new Promise((resolve) => {
-        // @ts-ignore
         this.spreadStdoutAndStdErr(exec(script, this.putsAsync(resolve)))
       })
     }

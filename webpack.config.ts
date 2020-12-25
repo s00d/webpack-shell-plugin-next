@@ -71,7 +71,7 @@ const config: webpack.Configuration = {
             console.log('run async tTimeout')
             setTimeout(() => {
               console.log('end async tTimeout')
-              resolve()
+              resolve('ok')
             }, 500)
           }),
           () => {

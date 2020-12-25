@@ -121,7 +121,7 @@ it('Check scripts run', (done) => {
           scripts: [
             () => new Promise((resolve, reject) => {
               fs.writeFileSync(path.join(__dirname, './out/run.txt'), 'Hey there!')
-              resolve()
+              resolve('ok')
             })
           ],
           blocking: true,
@@ -160,7 +160,7 @@ describe('testEvents', () => {
             scripts: [
               () => new Promise((resolve, reject) => {
                 mockedLog('test 1')
-                resolve()
+                resolve('ok')
               })
             ],
             blocking: true,

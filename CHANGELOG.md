@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2020-12-25
+
+### Removed
+- package-lock.json
+
+## [2.1.0] - 2020-12-25
+
+### Changed
+- use spawn by default
+
+### Removed
+- remove os check
+
 ## [2.0.5] - 2020-11-10
 
 ### Added

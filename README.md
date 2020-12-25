@@ -106,11 +106,21 @@ how to use functions in the queue?
             console.log('run async tTimeout');
             setTimeout(() => {
                 console.log('end async tTimeout');
-                resolve();
+                resolve('ok');
             }, 1000);
         }),
     ],
     blocking: true
+}
+```
+
+```js
+// use exec
+import * as os from 'os'
+{
+    safe: os.platform() === 'win32', // by default spawn is used everywhere. If you have problems try using safe: true
+    scripts: [
+      ...
 }
 ```
 
