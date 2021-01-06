@@ -5,7 +5,7 @@
  */
 
 import { spawn, exec, spawnSync, execSync, ChildProcess, ExecException } from 'child_process'
-import { Options, Script, Tasks, Task } from './types'
+import { Options, Script, Tasks, Task, TasksWithErrors, FunctionWithErrors, OnError } from './types'
 import * as webpack from 'webpack'
 import { Readable } from 'stream'
 
@@ -20,16 +20,17 @@ export default class WebpackShellPlugin {
   private onBeforeBuild: Tasks
   private onBuildStart: Tasks
   private onBuildEnd: Tasks
-  private onBuildExit: Tasks
-  private onBuildError: Tasks
+  private onBuildExit: TasksWithErrors
+  private onBuildError: TasksWithErrors
   private onWatchRun: Tasks
   private onDoneWatch: Tasks
-  private onAfterDone: Tasks
+  private onAfterDone: TasksWithErrors
   private env: any = {}
   private dev = true
   private safe = false
   private logging = true
   private swallowError = false
+  private buildErrors: webpack.WebpackError[] | undefined
 
   private validateEvent (tasks: Tasks | string | Function | undefined | null): Tasks {
     if (!tasks) {
@@ -44,6 +45,15 @@ export default class WebpackShellPlugin {
     return tasks
   }
 
+  private validateEventWithErrors (tasks: TasksWithErrors | string | FunctionWithErrors | undefined | null, onError: OnError): TasksWithErrors {
+    const validated = this.validateEvent(tasks) as TasksWithErrors
+    if (typeof tasks === 'object') {
+      validated.onError = tasks?.onError
+    }
+    validated.onError ??= onError
+    return validated
+  }
+
   constructor (options: Options) {
     if (options.verbose) {
       this.warn(`WebpackShellPlugin [${new Date()}]: Verbose is being deprecated, please remove.`)
@@ -53,11 +63,11 @@ export default class WebpackShellPlugin {
     this.onBeforeNormalRun = this.validateEvent(options.onBeforeNormalRun)
     this.onBuildStart = this.validateEvent(options.onBuildStart)
     this.onBuildEnd = this.validateEvent(options.onBuildEnd)
-    this.onBuildExit = this.validateEvent(options.onBuildExit)
-    this.onBuildError = this.validateEvent(options.onBuildError)
+    this.onBuildExit = this.validateEventWithErrors(options.onBuildExit, 'skip')
+    this.onBuildError = this.validateEventWithErrors(options.onBuildError, 'execute')
     this.onWatchRun = this.validateEvent(options.onWatchRun)
     this.onDoneWatch = this.validateEvent(options.onDoneWatch)
-    this.onAfterDone = this.validateEvent(options.onAfterDone)
+    this.onAfterDone = this.validateEventWithErrors(options.onAfterDone, 'skip')
 
     if (options.env !== undefined) {
       this.env = options.env
@@ -115,6 +125,15 @@ export default class WebpackShellPlugin {
     return { command, args }
   }
 
+  private async handleFunction (script: Function | FunctionWithErrors, blocking: boolean, onError: OnError | null) {
+    const arg = (onError === null) ? [] : [this.buildErrors]
+    if (blocking) {
+      await script(...arg)
+    } else {
+      script(...arg)
+    }
+  }
+
   private handleScript (script: string) {
     if (this.safe) {
       return execSync(script, { maxBuffer: Number.MAX_SAFE_INTEGER, stdio: this.logging ? [0, 1, 2] : undefined })
@@ -138,8 +157,11 @@ export default class WebpackShellPlugin {
     return new Promise((resolve) => proc.on('close', this.putsAsync(resolve)))
   }
 
-  private async executeScripts (scripts: Task[], parallel = false, blocking = false) {
+  private async executeScripts (scripts: Task[], parallel = false, blocking = false, onError = null as OnError | null) {
     if (!scripts || scripts.length <= 0) {
+      return
+    }
+    if (onError === 'skip' && this.buildErrors?.length) {
       return
     }
 
@@ -150,12 +172,7 @@ export default class WebpackShellPlugin {
     for (let i = 0; i < scripts.length; i++) {
       const script: Task = scripts[i]
       if (typeof script === 'function') {
-        // if(script instanceof Promise)
-        if (blocking) {
-          await script()
-        } else {
-          script()
-        }
+        await this.handleFunction(script, blocking, onError)
         continue
       }
       if (blocking) {
@@ -195,11 +212,12 @@ export default class WebpackShellPlugin {
     const onAfterDone = this.onAfterDone
     if (onAfterDone.scripts && onAfterDone.scripts.length > 0) {
       this.log('Executing additional scripts before exit')
-      await this.executeScripts(onAfterDone.scripts, onAfterDone.parallel, onAfterDone.blocking)
+      await this.executeScripts(onAfterDone.scripts, onAfterDone.parallel, onAfterDone.blocking, onAfterDone.onError)
       if (this.dev) {
         this.onBuildExit = JSON.parse(JSON.stringify(defaultTask))
       }
     }
+    this.buildErrors = undefined
   }
 
   private readonly afterCompile = async (compilation: webpack.Compilation, callback?: Function): Promise<void> => {
@@ -252,12 +270,13 @@ export default class WebpackShellPlugin {
     }
   };
 
-  private readonly onDone = async (compilation: webpack.Stats, callback?: Function): Promise<void> => {
-    if (compilation.hasErrors()) {
+  private readonly onDone = async (stats: webpack.Stats, callback?: Function): Promise<void> => {
+    if (stats.hasErrors()) {
+      this.buildErrors = stats.compilation.errors
       const onBuildError = this.onBuildError
       if (onBuildError.scripts && onBuildError.scripts.length > 0) {
         this.warn('Executing error scripts before exit')
-        await this.executeScripts(onBuildError.scripts, onBuildError.parallel, onBuildError.blocking)
+        await this.executeScripts(onBuildError.scripts, onBuildError.parallel, onBuildError.blocking, onBuildError.onError)
         if (this.dev) {
           this.onBuildError = JSON.parse(JSON.stringify(defaultTask))
         }
@@ -266,7 +285,7 @@ export default class WebpackShellPlugin {
     const onBuildExit = this.onBuildExit
     if (onBuildExit.scripts && onBuildExit.scripts.length > 0) {
       this.log('Executing additional scripts before exit')
-      await this.executeScripts(onBuildExit.scripts, onBuildExit.parallel, onBuildExit.blocking)
+      await this.executeScripts(onBuildExit.scripts, onBuildExit.parallel, onBuildExit.blocking, onBuildExit.onError)
       if (this.dev) {
         this.onBuildExit = JSON.parse(JSON.stringify(defaultTask))
       }

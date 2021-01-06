@@ -1,35 +1,47 @@
+import { WebpackError } from 'webpack';
+export declare type FunctionWithErrors = (errors?: WebpackError[]) => void;
+export declare type OnError = 'skip' | 'execute';
+export declare type TaskOption = Task | Tasks;
 export declare type Task = Function | string;
 export declare type Tasks = {
     scripts?: Task[];
     blocking?: boolean;
     parallel?: boolean;
 };
+export declare type TaskOptionWithErrors = TaskWithErrors | TasksWithErrors;
+export declare type TaskWithErrors = Exclude<Task, Function> | FunctionWithErrors;
+export declare type TasksWithErrors = Omit<Tasks, 'scripts'> & {
+    scripts?: TaskWithErrors[];
+    onError?: OnError;
+};
+export declare type OnBuildErrorOption = OnBuildErrorTasks | TaskWithErrors;
+export declare type OnBuildErrorTasks = Omit<TasksWithErrors, 'onError'>;
 export declare type Script = {
     command: string;
     args: string[];
 };
 export declare type Options = {
     /** Scripts to execute before normal run (without --watch). Defaults to []. */
-    onBeforeNormalRun?: Tasks | string | Function;
+    onBeforeNormalRun?: TaskOption;
     /** Scripts to execute on the before build. Defaults to []. */
-    onBeforeBuild?: Tasks | string | Function;
+    onBeforeBuild?: TaskOption;
     /** Scripts to execute on the initial build. Defaults to []. */
-    onBuildStart?: Tasks | string | Function;
+    onBuildStart?: TaskOption;
     /**
      * Scripts to execute after files are emitted at the end of the
      * compilation. Defaults to [].
      */
-    onBuildEnd?: Tasks | string | Function;
+    onBuildEnd?: TaskOption;
     /** Scripts to execute after Webpack's process completes. Defaults to []. */
-    onBuildExit?: Tasks | string | Function;
+    onBuildExit?: TaskOptionWithErrors;
     /** Scripts to execute after Webpack's process Error. Defaults to []. */
-    onBuildError?: Tasks | string | Function;
+    onBuildError?: OnBuildErrorOption;
     /** Scripts to execute after onWatchRun. Defaults to []. */
-    onWatchRun?: Tasks | string | Function;
+    onWatchRun?: TaskOption;
     /** Scripts to execute after files are emitted at the end with watch. Defaults to []. */
-    onDoneWatch?: Tasks | string | Function;
+    onDoneWatch?: TaskOption;
     /** Scripts to execute after done. Defaults to []. */
-    onAfterDone?: Tasks | string | Function;
+    onAfterDone?: TaskOptionWithErrors;
     /**
      * Switch for development environments. This causes scripts to execute once.
      * Useful for running HMR on webpack-dev-server or webpack watch mode.

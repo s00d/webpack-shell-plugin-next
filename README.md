@@ -70,11 +70,12 @@ module.exports = {
 
 * `blocking (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: block webpack until scripts finish execution.
 * `parallel (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: execute scripts in parallel, otherwise execute scripts in the order in which they are specified in the scripts array.
-* `env`: Object with environment variables that will be applied to the executables **Default: { }**
-* `logging`:  show output for internal messages.  **Default: true**
-* `swallowError`: ignore script errors (useful in watch mode) **Default: false**
-* `dev`: switch for development environments. This causes scripts to execute once. Useful for running HMR on webpack-dev-server or webpack watch mode. **Default: true**
-* `safe`: switches script execution process from spawn to exec. If running into problems with spawn, turn this setting on. **Default: false**
+* `onError (onBuildExit, onAfterDone)`: use `"skip"` to disable execution if an error is encountered during `onBuildError`. otherwise, use `"execute"` and an `errors` argument will be provided to your `scripts` callbacks. **Default: `"skip"`**
+* `env`: Object with environment variables that will be applied to the executables **Default: `{ }`**
+* `logging`:  show output for internal messages.  **Default: `true`**
+* `swallowError`: ignore script errors (useful in watch mode) **Default: `false`**
+* `dev`: switch for development environments. This causes scripts to execute once. Useful for running HMR on webpack-dev-server or webpack watch mode. **Default: `true`**
+* `safe`: switches script execution process from spawn to exec. If running into problems with spawn, turn this setting on. **Default: `false`**
 
 **Note:** below combination is not supported.
  ```
@@ -123,6 +124,11 @@ import * as os from 'os'
       ...
 }
 ```
+
+Callbacks for the following hooks will be passed an `(errors: WebpackError[] | undefined)` argument:  
+- `onBuildError`
+- `onBuildExit`
+- `onAfterDone`
 
 ### Developing
 

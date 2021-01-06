@@ -1,9 +1,25 @@
+import { WebpackError } from 'webpack'
+
+export type FunctionWithErrors = (errors?:WebpackError[]) => void
+export type OnError = 'skip' | 'execute'
+
+export type TaskOption = Task | Tasks
 export type Task = Function | string
 export type Tasks = {
   scripts?: Task[],
   blocking?: boolean,
   parallel?: boolean
 }
+
+export type TaskOptionWithErrors = TaskWithErrors | TasksWithErrors
+export type TaskWithErrors = Exclude<Task, Function> | FunctionWithErrors
+export type TasksWithErrors = Omit<Tasks, 'scripts'> & {
+  scripts?: TaskWithErrors[]
+  onError?: OnError
+}
+
+export type OnBuildErrorOption = OnBuildErrorTasks | TaskWithErrors
+export type OnBuildErrorTasks = Omit<TasksWithErrors, 'onError'>
 
 export type Script = {
   command: string,
@@ -12,26 +28,26 @@ export type Script = {
 
 export type Options = {
   /** Scripts to execute before normal run (without --watch). Defaults to []. */
-  onBeforeNormalRun?: Tasks | string | Function
+  onBeforeNormalRun?: TaskOption
   /** Scripts to execute on the before build. Defaults to []. */
-  onBeforeBuild?: Tasks | string | Function
+  onBeforeBuild?: TaskOption
   /** Scripts to execute on the initial build. Defaults to []. */
-  onBuildStart?: Tasks | string | Function
+  onBuildStart?: TaskOption
   /**
    * Scripts to execute after files are emitted at the end of the
    * compilation. Defaults to [].
    */
-  onBuildEnd?: Tasks | string | Function
+  onBuildEnd?: TaskOption
   /** Scripts to execute after Webpack's process completes. Defaults to []. */
-  onBuildExit?: Tasks | string | Function
+  onBuildExit?: TaskOptionWithErrors
   /** Scripts to execute after Webpack's process Error. Defaults to []. */
-  onBuildError?: Tasks | string | Function
+  onBuildError?: OnBuildErrorOption
   /** Scripts to execute after onWatchRun. Defaults to []. */
-  onWatchRun?: Tasks | string | Function
+  onWatchRun?: TaskOption
   /** Scripts to execute after files are emitted at the end with watch. Defaults to []. */
-  onDoneWatch?: Tasks | string | Function
+  onDoneWatch?: TaskOption
   /** Scripts to execute after done. Defaults to []. */
-  onAfterDone?: Tasks | string | Function
+  onAfterDone?: TaskOptionWithErrors
 
   /**
    * Switch for development environments. This causes scripts to execute once.
