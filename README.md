@@ -2,7 +2,7 @@
 [![npm downloads](https://img.shields.io/npm/dw/webpack-shell-plugin-next)](https://badge.fury.io/js/webpack-shell-plugin-next)
 [![NPM license](https://img.shields.io/npm/l/webpack-shell-plugin-next)](https://github.com/s00d/webpack-shell-plugin-next/blob/master/LICENSE)
 [![npm type definitions](https://img.shields.io/npm/types/webpack-shell-plugin-next)](https://github.com/s00d/webpack-shell-plugin-next)
-[![Build Status](https://travis-ci.org/s00d/webpack-shell-plugin-next.svg?branch=master)](https://travis-ci.org/s00d/webpack-shell-plugin-next)
+![Build Status](https://github.com/s00d/webpack-shell-plugin-next/workflows/Node.js%20CI/badge.svg?branch=master)
 [![donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.me/s00d)
 [![GitHub Repo stars](https://img.shields.io/github/stars/s00d/webpack-shell-plugin-next?style=social)](https://github.com/s00d/webpack-shell-plugin-next)
 # Webpack Shell Plugin Next
