@@ -134,7 +134,9 @@ export default class WebpackShellPlugin {
     }
 
     const { command, args } = this.serializeScript(script)
-    const proc = spawn(command, args, { stdio: 'inherit' })
+    let env = Object.create(global.process.env)
+    env = Object.assign(env, this.env)
+    const proc = spawn(command, args, { stdio: 'inherit', env: env  })
     return new Promise((resolve) => proc.on('close', this.putsAsync(resolve)))
   }
 
