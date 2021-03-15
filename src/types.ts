@@ -61,6 +61,11 @@ export type Options = {
    */
   swallowError?: boolean
 
+  /**
+   * run command in shell. Default: true
+   */
+  shell?: boolean
+
   /** DEPRECATED. Enable for verbose output. Defaults to false. */
   verbose?: boolean
 }

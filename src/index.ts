@@ -27,6 +27,7 @@ export default class WebpackShellPlugin {
   private onAfterDone: Tasks
   private env: any = {}
   private dev = true
+  private shell = true
   private safe = false
   private logging = true
   private swallowError = false
@@ -67,6 +68,9 @@ export default class WebpackShellPlugin {
     }
     if (options.safe !== undefined) {
       this.safe = options.safe
+    }
+    if (options.shell !== undefined) {
+      this.shell = options.shell
     }
     if (options.logging !== undefined) {
       this.logging = options.logging
@@ -123,7 +127,7 @@ export default class WebpackShellPlugin {
     const { command, args } = this.serializeScript(script)
     let env = Object.create(global.process.env)
     env = Object.assign(env, this.env)
-    const result = spawnSync(command, args, { stdio: this.logging ? ['inherit', 'inherit', 'pipe'] : undefined, env, shell: true })
+    const result = spawnSync(command, args, { stdio: this.logging ? ['inherit', 'inherit', 'pipe'] : undefined, env, shell: this.shell })
     if (this.logging && result.status !== 0) {
       this.error(`stderr error ${command} ${args.join(' ')}: ${result.stderr}`)
     }
@@ -140,7 +144,7 @@ export default class WebpackShellPlugin {
     const { command, args } = this.serializeScript(script)
     let env = Object.create(global.process.env)
     env = Object.assign(env, this.env)
-    const proc = spawn(command, args, { stdio: 'inherit', env: env, shell: true })
+    const proc = spawn(command, args, { stdio: 'inherit', env: env, shell: this.shell })
     if (this.logging) {
       proc.on('error', (err) => {
         this.error(`stderr error ${command} ${args.join(' ')}: ${err.message}`)
