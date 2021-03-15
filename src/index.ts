@@ -123,7 +123,11 @@ export default class WebpackShellPlugin {
     const { command, args } = this.serializeScript(script)
     let env = Object.create(global.process.env)
     env = Object.assign(env, this.env)
-    return spawnSync(command, args, { stdio: this.logging ? 'inherit' : undefined, env })
+    const result = spawnSync(command, args, { stdio: this.logging ? ['inherit', 'inherit', 'pipe'] : undefined, env, shell: true })
+    if (this.logging && result.status !== 0) {
+      this.error(`stderr error ${command} ${args.join(' ')}: ${result.stderr}`)
+    }
+    return result
   }
 
   private handleScriptAsync (script: string) {
@@ -136,7 +140,12 @@ export default class WebpackShellPlugin {
     const { command, args } = this.serializeScript(script)
     let env = Object.create(global.process.env)
     env = Object.assign(env, this.env)
-    const proc = spawn(command, args, { stdio: 'inherit', env: env  })
+    const proc = spawn(command, args, { stdio: 'inherit', env: env, shell: true })
+    if (this.logging) {
+      proc.on('error', (err) => {
+        this.error(`stderr error ${command} ${args.join(' ')}: ${err.message}`)
+      })
+    }
     return new Promise((resolve) => proc.on('close', this.putsAsync(resolve)))
   }
 
@@ -302,6 +311,12 @@ export default class WebpackShellPlugin {
   private warn (text: string) {
     if (this.logging) {
       console.warn(text)
+    }
+  }
+
+  private error (text: string) {
+    if (this.logging) {
+      console.error(text)
     }
   }
 }

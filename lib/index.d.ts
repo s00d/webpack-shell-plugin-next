@@ -40,4 +40,5 @@ export default class WebpackShellPlugin {
     private readonly watchRun;
     private log;
     private warn;
+    private error;
 }

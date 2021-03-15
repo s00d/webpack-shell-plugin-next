@@ -5,7 +5,7 @@ import * as path from 'path'
 
 const config: webpack.Configuration = {
   mode: 'development',
-  entry: path.resolve(__dirname, 'test/entry.js'),
+  entry: path.resolve(__dirname, 'tests/scripts/entry.js'),
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js'
@@ -81,8 +81,8 @@ const config: webpack.Configuration = {
           // () => console.log('run sync tTimeout 2'),
           'echo "wait sleep 2"',
           'sleep 2',
-          'node ./test/exit-code-1.js',
-          'node ./test/big_data.js',
+          'node ./tests/scripts/exit-code-1.js',
+          'node ./tests/scripts/big_data.js',
           'echo "wait sleep 2"',
           'sleep 2',
           'echo "end onBuildExit"'
