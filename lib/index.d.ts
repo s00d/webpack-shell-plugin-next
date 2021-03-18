@@ -20,12 +20,15 @@ export default class WebpackShellPlugin {
     private safe;
     private logging;
     private swallowError;
+    private buildErrors;
     private validateEvent;
+    private validateEventWithErrors;
     constructor(options: Options);
     private putsAsync;
     private puts;
     private spreadStdoutAndStdErr;
     private serializeScript;
+    private handleFunction;
     private handleScript;
     private handleScriptAsync;
     private executeScripts;
