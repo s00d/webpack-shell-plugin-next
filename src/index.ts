@@ -25,6 +25,7 @@ export default class WebpackShellPlugin {
   private onWatchRun: Tasks
   private onDoneWatch: Tasks
   private onAfterDone: Tasks
+  private onFailedBuild: Tasks
   private env: any = {}
   private dev = true
   private shell = true
@@ -59,6 +60,7 @@ export default class WebpackShellPlugin {
     this.onWatchRun = this.validateEvent(options.onWatchRun)
     this.onDoneWatch = this.validateEvent(options.onDoneWatch)
     this.onAfterDone = this.validateEvent(options.onAfterDone)
+    this.onFailedBuild = this.validateEvent(options.onFailedBuild)
 
     if (options.env !== undefined) {
       this.env = options.env
@@ -84,7 +86,7 @@ export default class WebpackShellPlugin {
     this.onAfterEmit = this.onAfterEmit.bind(this)
     this.onDone = this.onDone.bind(this)
     this.afterDone = this.afterDone.bind(this)
-    this.onInvalid = this.onInvalid.bind(this)
+    this.onFailed = this.onFailed.bind(this)
     this.putsAsync = this.putsAsync.bind(this)
     this.puts = this.puts.bind(this)
   }
@@ -183,7 +185,8 @@ export default class WebpackShellPlugin {
 
   apply (compiler: webpack.Compiler): void {
     compiler.hooks.beforeRun.tapAsync('webpack-shell-plugin-next', this.onBeforeRun)
-    compiler.hooks.invalid.tap('webpack-shell-plugin-next', this.onInvalid)
+    compiler.hooks.failed.tap('webpack-shell-plugin-next', this.onFailed)
+    compiler.hooks.make.tap('webpack-shell-plugin-next', this.onBefore)
     compiler.hooks.compilation.tap('webpack-shell-plugin-next', this.onCompilation)
     compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', this.onAfterEmit)
     compiler.hooks.done.tapAsync('webpack-shell-plugin-next', this.onDone)
@@ -231,7 +234,18 @@ export default class WebpackShellPlugin {
     }
   };
 
-  private readonly onInvalid = async (compilation: string): Promise<void> => {
+  private readonly onFailed = async (): Promise<void> => {
+    const onFailedBuild = this.onFailedBuild
+    if (onFailedBuild.scripts && onFailedBuild.scripts.length) {
+      this.log('Executing before build scripts')
+      await this.executeScripts(onFailedBuild.scripts, onFailedBuild.parallel, onFailedBuild.blocking)
+      if (this.dev) {
+        this.onBeforeBuild = JSON.parse(JSON.stringify(defaultTask))
+      }
+    }
+  };
+
+  private readonly onBefore = async (compilation: webpack.Compilation): Promise<void> => {
     const onBeforeBuild = this.onBeforeBuild
     if (onBeforeBuild.scripts && onBeforeBuild.scripts.length) {
       this.log('Executing before build scripts')

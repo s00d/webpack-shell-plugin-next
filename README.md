@@ -15,11 +15,11 @@ Goes great with running cron jobs, reporting tools, or tests such as selenium, p
 
 ## Webpack compatibility
 
- Webpack      | webpack-shell-plugin-next
-:-------------|:----------
- *-4.x        | 1.*
- 5.x          | 2.*
- 
+| Webpack | webpack-shell-plugin-next |
+|:--------|:--------------------------|
+| *-4.x   | 1.*                       |
+| 5.x     | 2.*                       |
+
 ## WARNING
 
 This plugin is meant for running simple command line executions. It is not meant to be a task management tool.
@@ -35,7 +35,7 @@ In `webpack.config.js`:
 const WebpackShellPluginNext = require('webpack-shell-plugin-next');
 ...
 module.exports = {
-  ...
+  //...
   plugins: [
     new WebpackShellPluginNext({
       onBuildStart:{
@@ -49,8 +49,8 @@ module.exports = {
         parallel: true
       }
     })
-  ],
-  ...
+  ]
+  //...
 }
 ```
 **More example in webpack.config.ts**
@@ -65,6 +65,7 @@ module.exports = {
 * `onDoneWatch`: configuration object for scripts that execute after files are emitted at the end of the compilation with watch. 
 * `onBeforeNormalRun`: configuration object for scripts that execute on normal run without --watch option
 * `onAfterDone`: configuration object for scripts that execute after done. 
+* `onFailedBuild`: configuration object for scripts that execute after error. 
 
 ***Default for all: ```{scripts: [],blocking: false,parallel: false}```***
 
@@ -95,32 +96,37 @@ how to use functions in the queue?
 #### Example:
 ```js
 {
+  {
     scripts: [
-        // sync
-        () => {
-            console.log('run tTimeout 1');
-            setTimeout(() => console.log('end Timeout 1'), 1000);
-        },
-        // async
-        () => new Promise((resolve, reject) => {
-            console.log('run async tTimeout');
-            setTimeout(() => {
-                console.log('end async tTimeout');
-                resolve('ok');
-            }, 1000);
-        }),
+      // sync
+      () => {
+        console.log('run tTimeout 1');
+        setTimeout(() => console.log('end Timeout 1'), 1000);
+      },
+      // async
+      () => new Promise((resolve, reject) => {
+        console.log('run async tTimeout');
+        setTimeout(() => {
+          console.log('end async tTimeout');
+          resolve('ok');
+        }, 1000);
+      }),
     ],
-    blocking: true
+      blocking: true
+  }
 }
 ```
 
 ```js
 // use exec
 import * as os from 'os'
+// ..
 {
     safe: os.platform() === 'win32', // by default spawn is used everywhere. If you have problems try using safe: true
     scripts: [
-      ...
+      //...
+    ]
+    //  ...
 }
 ```
 

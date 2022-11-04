@@ -13,6 +13,8 @@ export declare type Options = {
     onBeforeNormalRun?: Tasks | string | Function;
     /** Scripts to execute on the before build. Defaults to []. */
     onBeforeBuild?: Tasks | string | Function;
+    /** Scripts to execute on the before error. Defaults to []. */
+    onFailedBuild?: Tasks | string | Function;
     /** Scripts to execute on the initial build. Defaults to []. */
     onBuildStart?: Tasks | string | Function;
     /**
@@ -53,6 +55,10 @@ export declare type Options = {
      * ignore script errors (useful in watch mode)
      */
     swallowError?: boolean;
+    /**
+     * run command in shell. Default: true
+     */
+    shell?: boolean;
     /** DEPRECATED. Enable for verbose output. Defaults to false. */
     verbose?: boolean;
 };

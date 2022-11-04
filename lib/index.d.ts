@@ -15,8 +15,10 @@ export default class WebpackShellPlugin {
     private onWatchRun;
     private onDoneWatch;
     private onAfterDone;
+    private onFailedBuild;
     private env;
     private dev;
+    private shell;
     private safe;
     private logging;
     private swallowError;
@@ -33,7 +35,8 @@ export default class WebpackShellPlugin {
     private readonly onBeforeRun;
     private readonly afterDone;
     private readonly afterCompile;
-    private readonly onInvalid;
+    private readonly onFailed;
+    private readonly onBefore;
     private readonly onCompilation;
     private readonly onAfterEmit;
     private readonly onDone;

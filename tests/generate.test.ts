@@ -4,6 +4,7 @@ import Webpack from 'webpack'
 import rimraf from 'rimraf'
 import fs from 'fs'
 
+// tslint:disable-next-line:no-empty
 console.log = (data: any) => {}
 
 beforeEach(() => {
@@ -57,7 +58,7 @@ it('Check scripts exec', (done) => {
       })
     ]
   }, (error, stats) => {
-    done()
+    done(error)
   })
 })
 
@@ -70,6 +71,7 @@ it('Check scripts exit code', (done) => {
     },
     plugins: [
       new WebpackShellPlugin({
+        logging: false,
         onBuildExit: {
           scripts: [
             'node ./tests/scripts/exit-code-1.js'
@@ -79,7 +81,7 @@ it('Check scripts exit code', (done) => {
         }
       })
     ]
-  }, (error, stats) => {
+  }, () => {
     done()
   })
 })
@@ -93,6 +95,7 @@ it('Check scripts with file', (done) => {
     },
     plugins: [
       new WebpackShellPlugin({
+        logging: false,
         onBuildExit: {
           scripts: [
             'node ./tests/scripts/file.js'
@@ -102,7 +105,7 @@ it('Check scripts with file', (done) => {
         }
       })
     ]
-  }, (error, stats) => {
+  }, () => {
     expect(fs.existsSync(path.join(__dirname, './out/test.txt'))).toBe(true)
     done()
   })
@@ -130,6 +133,9 @@ it('Check scripts run', (done) => {
       })
     ]
   }, (error, stats) => {
+    if (error) {
+      throw Error(error.message)
+    }
     expect(fs.existsSync(path.join(__dirname, './out/run.txt'))).toBe(true)
     expect(fs.existsSync(path.join(__dirname, './out/bundle.js'))).toBe(true)
     done()
@@ -172,7 +178,7 @@ describe('testEvents', () => {
       expect(consoleOutput).toEqual([
         'test 1'
       ])
-      done()
+      done(error)
     })
   })
 
@@ -202,11 +208,35 @@ describe('testEvents', () => {
         expect(consoleOutput).toEqual([
           'onBeforeNormalRun',
           'onBuildStart',
+          'onBeforeBuild',
           'onBuildEnd',
           'onBuildExit',
           'onAfterDone'
         ])
-        done()
+        done(error)
+      }, 100)
+    })
+  })
+
+  it('test onBeforeBuild', (done) => {
+    consoleOutput = []
+    Webpack({
+      entry: path.resolve(__dirname, './webpack/index.js'),
+      output: {
+        path: path.resolve(__dirname, 'out'),
+        filename: 'bundle.js'
+      },
+      plugins: [
+        new WebpackShellPlugin({
+          onBeforeBuild: () => mockedLog('onBeforeBuild'),
+        })
+      ]
+    }, (error, stats) => {
+      setTimeout(() => {
+        expect(consoleOutput).toEqual([
+          'onBeforeBuild',
+        ])
+        done(error)
       }, 100)
     })
   })

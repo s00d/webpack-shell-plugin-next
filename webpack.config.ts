@@ -26,89 +26,27 @@ const config: webpack.Configuration = {
   },
   plugins: [
     new WebpackShellPlugin({
-      onBeforeNormalRun: {
-        scripts: [
-          'echo "onBeforeRun"',
-          'sleep 1'
-        ],
-        blocking: true,
-        parallel: false
-      },
       onBuildStart: {
         scripts: [
-          'echo "onBuildStart"',
-          'sleep 1'
-        ],
-        blocking: true,
-        parallel: false
+          `echo "test onBuildStart"`,
+          'echo "Building ..."'
+        ]
       },
       onBuildEnd: {
         scripts: [
-          'echo "onBuildEnd"',
-          () => {
-            console.log('run tTimeout 1')
-            setTimeout(() => console.log('end Timeout 1'), 1000)
-          },
-          () => {
-            console.log('run tTimeout 2')
-            setTimeout(() => console.log('end Timeout 2'), 1000)
-          },
-          () => {
-            console.log('run tTimeout 3')
-            setTimeout(() => console.log('end Timeout 3'), 1000)
-          },
-          // () => console.log('run sync tTimeout 2'),
-          'echo "wait sleep 2"',
-          'sleep 2',
-          'echo "end"'
-        ],
-        blocking: true
+          'echo "Done!"'
+        ]
       },
-      onBuildExit: {
+      dev: false,
+      safe: false,
+      logging: true
+    }),
+    new WebpackShellPlugin({
+      onBeforeBuild: {
         scripts: [
-          'echo "onBuildExit"',
-          () => new Promise((resolve, reject) => {
-            console.log('run async tTimeout')
-            setTimeout(() => {
-              console.log('end async tTimeout')
-              resolve('ok')
-            }, 500)
-          }),
-          () => {
-            console.log('run sync tTimeout 2')
-            setTimeout(() => console.log('end sync Timeout 2'), 100)
-          },
-          // () => console.log('run sync tTimeout 2'),
-          'echo "wait sleep 2"',
-          'sleep 2',
-          'node ./tests/scripts/exit-code-1.js',
-          'node ./tests/scripts/big_data.js',
-          'echo "wait sleep 2"',
-          'sleep 2',
-          'echo "end onBuildExit"'
-        ],
-        blocking: true,
-        parallel: false
-      },
-      onBuildError: {
-        scripts: ['echo "Webpack ERROR"'],
-        parallel: false,
-        blocking: true
-      },
-      onWatchRun: {
-        scripts: ['echo "Webpack onWatchRun"'],
-        parallel: false,
-        blocking: true
-      },
-      onDoneWatch: {
-        scripts: ['echo "Webpack onDoneWatch"'],
-        parallel: false,
-        blocking: true
-      },
-      onAfterDone: {
-        scripts: ['echo "Webpack onAfterDone"'],
-        parallel: false,
-        blocking: true
+          `echo "test onBeforeBuild"`,
+          'echo "Building ..."'
+        ]
       },
       dev: false,
       safe: false,
