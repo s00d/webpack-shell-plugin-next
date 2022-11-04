@@ -71,19 +71,36 @@ module.exports = {
 
 * `blocking (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: block webpack until scripts finish execution.
 * `parallel (onBeforeBuild, onBuildStart, onBuildEnd, onBuildExit, onBuildExit, onWatchRun)`: execute scripts in parallel, otherwise execute scripts in the order in which they are specified in the scripts array.
+
+**Note:** below combination is not supported.
+ ```js
+{
+  blocking: true
+  parallel: true
+} 
+ ```
+ 
+***Other global params***
 * `env`: Object with environment variables that will be applied to the executables **Default: { }**
 * `logging`:  show output for internal messages.  **Default: true**
 * `swallowError`: ignore script errors (useful in watch mode) **Default: false**
 * `dev`: switch for development environments. This causes scripts to execute once. Useful for running HMR on webpack-dev-server or webpack watch mode. **Default: true**
 * `safe`: switches script execution process from spawn to exec. If running into problems with spawn, turn this setting on. **Default: false**
 
-**Note:** below combination is not supported.
- ```
-{
-  blocking: true
-  parallel: true
-} 
- ```
+
+```js
+new WebpackShellPlugin({
+      onBeforeNormalRun: {
+        // ...
+      },
+      dev: false,
+      safe: false,
+      logging: true
+    })
+  ]
+}
+```
+
 
 ### TypeScript
 
