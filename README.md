@@ -66,6 +66,7 @@ module.exports = {
 * `onBeforeNormalRun`: configuration object for scripts that execute on normal run without --watch option
 * `onAfterDone`: configuration object for scripts that execute after done. 
 * `onFailedBuild`: configuration object for scripts that execute after error. 
+* `onBeforeCompile`: configuration object for scripts that execute before complite. 
 
 ***Default for all: ```{scripts: [],blocking: false,parallel: false}```***
 

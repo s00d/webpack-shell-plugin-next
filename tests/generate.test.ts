@@ -1,8 +1,9 @@
 import path from 'path'
 import WebpackShellPlugin from '../src/index'
 import Webpack from 'webpack'
-import rimraf from 'rimraf'
 import fs from 'fs'
+import WebpackShellPluginNext from '../src'
+import { rimraf } from 'rimraf'
 
 // tslint:disable-next-line:no-empty
 console.log = (data: any) => {}
@@ -239,5 +240,30 @@ describe('testEvents', () => {
         done(error)
       }, 100)
     })
+  })
+
+  it('test onBeforeCompile', (done) => {
+    consoleOutput = []
+    Webpack(
+      {
+        entry: path.resolve(__dirname, './webpack/index.js'),
+        output: {
+          path: path.resolve(__dirname, 'out'),
+          filename: 'bundle.js',
+        },
+        plugins: [
+          new WebpackShellPluginNext({
+            onAfterDone: () => mockedLog('onAfterDone'),
+            onBeforeCompile: () => mockedLog('onBeforeCompile'),
+          }),
+        ],
+      },
+      (error, stats) => {
+        setTimeout(() => {
+          expect(consoleOutput).toEqual(['onBeforeCompile', 'onAfterDone'])
+          done(error)
+        }, 200)
+      }
+    )
   })
 })

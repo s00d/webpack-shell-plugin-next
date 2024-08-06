@@ -1,37 +1,80 @@
-export declare type Task = Function | string;
-export declare type Tasks = {
+export type Task = Function | string;
+export type Tasks = {
     scripts?: Task[];
     blocking?: boolean;
     parallel?: boolean;
 };
-export declare type Script = {
+export type Script = {
     command: string;
     args: string[];
 };
-export declare type Options = {
-    /** Scripts to execute before normal run (without --watch). Defaults to []. */
+export type Options = {
+    /**
+     * Scripts to execute before a normal run (without --watch).
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
     onBeforeNormalRun?: Tasks | string | Function;
-    /** Scripts to execute on the before build. Defaults to []. */
+    /**
+     * Scripts to execute before the build process starts.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
     onBeforeBuild?: Tasks | string | Function;
-    /** Scripts to execute on the before error. Defaults to []. */
+    /**
+     * Scripts to execute when the build fails.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
     onFailedBuild?: Tasks | string | Function;
-    /** Scripts to execute on the initial build. Defaults to []. */
+    /**
+     * Scripts to execute at the start of the build process.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
     onBuildStart?: Tasks | string | Function;
     /**
-     * Scripts to execute after files are emitted at the end of the
-     * compilation. Defaults to [].
+     * Scripts to execute after files are emitted at the end of the compilation.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
      */
     onBuildEnd?: Tasks | string | Function;
-    /** Scripts to execute after Webpack's process completes. Defaults to []. */
+    /**
+     * Scripts to execute after Webpack's process completes.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
     onBuildExit?: Tasks | string | Function;
-    /** Scripts to execute after Webpack's process Error. Defaults to []. */
+    /**
+     * Scripts to execute after a build error occurs.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
     onBuildError?: Tasks | string | Function;
-    /** Scripts to execute after onWatchRun. Defaults to []. */
+    /**
+     * Scripts to execute before each watch run.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
     onWatchRun?: Tasks | string | Function;
-    /** Scripts to execute after files are emitted at the end with watch. Defaults to []. */
+    /**
+     * Scripts to execute after files are emitted at the end of each watch cycle.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
     onDoneWatch?: Tasks | string | Function;
-    /** Scripts to execute after done. Defaults to []. */
+    /**
+     * Scripts to execute after the entire Webpack process is done.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
     onAfterDone?: Tasks | string | Function;
+    /**
+     * Scripts to execute before the compilation process starts.
+     * Can be a Tasks object, a single script string, or a function.
+     * Defaults to [].
+     */
+    onBeforeCompile?: Tasks | string | Function;
     /**
      * Switch for development environments. This causes scripts to execute once.
      * Useful for running HMR on webpack-dev-server or webpack watch mode.
@@ -39,7 +82,7 @@ export declare type Options = {
      */
     dev?: boolean;
     /**
-     * Object with environment variables that will be applied to the executables
+     * Object with environment variables that will be applied to the executables.
      */
     env?: any;
     /**
@@ -48,17 +91,19 @@ export declare type Options = {
      */
     safe?: boolean;
     /**
-     * show log message
+     * Show log messages. Defaults to true.
      */
     logging?: boolean;
     /**
-     * ignore script errors (useful in watch mode)
+     * Ignore script errors (useful in watch mode). Defaults to false.
      */
     swallowError?: boolean;
     /**
-     * run command in shell. Default: true
+     * Run command in shell. Defaults to true.
      */
     shell?: boolean;
-    /** DEPRECATED. Enable for verbose output. Defaults to false. */
+    /**
+     * DEPRECATED. Enable for verbose output. Defaults to false.
+     */
     verbose?: boolean;
 };

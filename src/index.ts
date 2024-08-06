@@ -26,6 +26,7 @@ export default class WebpackShellPlugin {
   private onDoneWatch: Tasks
   private onAfterDone: Tasks
   private onFailedBuild: Tasks
+  private onBeforeCompile: Tasks
   private env: any = {}
   private dev = true
   private shell = true
@@ -48,7 +49,7 @@ export default class WebpackShellPlugin {
 
   constructor (options: Options) {
     if (options.verbose) {
-      this.warn(`WebpackShellPlugin [${new Date()}]: Verbose is being deprecated, please remove.`)
+      this.warn(`WebpackShellPluginNext [${new Date()}]: Verbose is being deprecated, please remove.`)
     }
 
     this.onBeforeBuild = this.validateEvent(options.onBeforeBuild)
@@ -61,6 +62,7 @@ export default class WebpackShellPlugin {
     this.onDoneWatch = this.validateEvent(options.onDoneWatch)
     this.onAfterDone = this.validateEvent(options.onAfterDone)
     this.onFailedBuild = this.validateEvent(options.onFailedBuild)
+    this.onBeforeCompile = this.validateEvent(options.onBeforeCompile)
 
     if (options.env !== undefined) {
       this.env = options.env
@@ -83,6 +85,7 @@ export default class WebpackShellPlugin {
 
     this.onCompilation = this.onCompilation.bind(this)
     this.onBeforeRun = this.onBeforeRun.bind(this)
+    this.onBeforeCompileRun = this.onBeforeCompileRun.bind(this)
     this.onAfterEmit = this.onAfterEmit.bind(this)
     this.onDone = this.onDone.bind(this)
     this.afterDone = this.afterDone.bind(this)
@@ -92,7 +95,7 @@ export default class WebpackShellPlugin {
   }
 
   private putsAsync (resolve: (val: any) => void) {
-    return (error: ExecException | null, stdout: string, stderr: string) => {
+    return (error: ExecException | null, _stdout: string, _stderr: string) => {
       if (error && !this.swallowError) {
         throw error
       }
@@ -100,7 +103,7 @@ export default class WebpackShellPlugin {
     }
   }
 
-  private puts (error: Error, stdout: Readable, stderr: Readable) {
+  private puts (error: Error, _stdout: Readable, _stderr: Readable) {
     if (error && !this.swallowError) {
       throw error
     }
@@ -161,13 +164,12 @@ export default class WebpackShellPlugin {
     }
 
     if (blocking && parallel) {
-      throw new Error(`WebpackShellPlugin [${new Date()}]: Not supported`)
+      throw new Error(`WebpackShellPluginNext [${new Date()}]: Not supported`)
     }
 
     for (let i = 0; i < scripts.length; i++) {
       const script: Task = scripts[i]
       if (typeof script === 'function') {
-        // if(script instanceof Promise)
         if (blocking) {
           await script()
         } else {
@@ -187,6 +189,7 @@ export default class WebpackShellPlugin {
     compiler.hooks.beforeRun.tapAsync('webpack-shell-plugin-next', this.onBeforeRun)
     compiler.hooks.failed.tap('webpack-shell-plugin-next', this.onFailed)
     compiler.hooks.make.tap('webpack-shell-plugin-next', this.onBefore)
+    compiler.hooks.beforeCompile.tapAsync('webpack-shell-plugin-next', this.onBeforeCompileRun)
     compiler.hooks.compilation.tap('webpack-shell-plugin-next', this.onCompilation)
     compiler.hooks.afterEmit.tapAsync('webpack-shell-plugin-next', this.onAfterEmit)
     compiler.hooks.done.tapAsync('webpack-shell-plugin-next', this.onDone)
@@ -195,7 +198,7 @@ export default class WebpackShellPlugin {
     compiler.hooks.watchRun.tapAsync('webpack-shell-plugin-next', this.watchRun)
   }
 
-  private readonly onBeforeRun = async (compiler: webpack.Compiler, callback?: Function): Promise<void> => {
+  private readonly onBeforeRun = async (_compiler: webpack.Compiler, callback?: Function): Promise<void> => {
     const onBeforeNormalRun = this.onBeforeNormalRun
     if (onBeforeNormalRun.scripts && onBeforeNormalRun.scripts.length > 0) {
       this.log('Executing pre-run scripts')
@@ -220,7 +223,7 @@ export default class WebpackShellPlugin {
     }
   }
 
-  private readonly afterCompile = async (compilation: webpack.Compilation, callback?: Function): Promise<void> => {
+  private readonly afterCompile = async (_compilation: webpack.Compilation, callback?: Function): Promise<void> => {
     const onDoneWatch = this.onDoneWatch
     if (onDoneWatch.scripts && onDoneWatch.scripts.length > 0) {
       this.log('Executing additional scripts before exit')
@@ -245,7 +248,7 @@ export default class WebpackShellPlugin {
     }
   };
 
-  private readonly onBefore = async (compilation: webpack.Compilation): Promise<void> => {
+  private readonly onBefore = async (_compilation: webpack.Compilation): Promise<void> => {
     const onBeforeBuild = this.onBeforeBuild
     if (onBeforeBuild.scripts && onBeforeBuild.scripts.length) {
       this.log('Executing before build scripts')
@@ -267,7 +270,21 @@ export default class WebpackShellPlugin {
     }
   };
 
-  private readonly onAfterEmit = async (compilation: webpack.Compilation, callback?: Function): Promise<void> => {
+  private readonly onBeforeCompileRun = async (_params: any, callback: () => void): Promise<void> => {
+    const onBeforeCompile = this.onBeforeCompile
+    if (onBeforeCompile.scripts && onBeforeCompile.scripts.length > 0) {
+      this.log('Executing pre-build scripts')
+      await this.executeScripts(onBeforeCompile.scripts, onBeforeCompile.parallel, onBeforeCompile.blocking)
+      if (this.dev) {
+        this.onBuildStart = JSON.parse(JSON.stringify(defaultTask))
+      }
+    }
+    if (callback) {
+      callback()
+    }
+  };
+
+  private readonly onAfterEmit = async (_compilation: webpack.Compilation, callback?: Function): Promise<void> => {
     const onBuildEndOption = this.onBuildEnd
     if (onBuildEndOption.scripts && onBuildEndOption.scripts.length > 0) {
       this.log('Executing post-build scripts')
@@ -305,7 +322,7 @@ export default class WebpackShellPlugin {
     }
   };
 
-  private readonly watchRun = async (compiler: webpack.Compiler, callback?: Function): Promise<void> => {
+  private readonly watchRun = async (_compiler: webpack.Compiler, callback?: Function): Promise<void> => {
     const onWatchRun = this.onWatchRun
     if (onWatchRun.scripts && onWatchRun.scripts.length) {
       this.log('Executing onWatchRun build scripts')
