@@ -133,6 +133,13 @@ export default class WebpackShellPlugin {
     let env = Object.create(global.process.env)
     env = Object.assign(env, this.env)
     const result = spawnSync(command, args, { stdio: this.logging ? ['inherit', 'inherit', 'pipe'] : undefined, env, shell: this.shell })
+    if (result.status !== 0 && !this.swallowError) {
+      const errorMessage = `Script failed with exit code ${result.status}: ${command} ${args.join(' ')}`
+      if (this.logging) {
+        this.error(`stderr error ${command} ${args.join(' ')}: ${result.stderr}`)
+      }
+      throw new Error(errorMessage)
+    }
     if (this.logging && result.status !== 0) {
       this.error(`stderr error ${command} ${args.join(' ')}: ${result.stderr}`)
     }
@@ -141,8 +148,14 @@ export default class WebpackShellPlugin {
 
   private handleScriptAsync (script: string) {
     if (this.safe) {
-      return new Promise((resolve) => {
-        this.spreadStdoutAndStdErr(exec(script, this.putsAsync(resolve)))
+      return new Promise((resolve, reject) => {
+        this.spreadStdoutAndStdErr(exec(script, (error, stdout, stderr) => {
+          if (error && !this.swallowError) {
+            reject(error)
+          } else {
+            resolve(error)
+          }
+        }))
       })
     }
 
@@ -155,7 +168,16 @@ export default class WebpackShellPlugin {
         this.error(`stderr error ${command} ${args.join(' ')}: ${err.message}`)
       })
     }
-    return new Promise((resolve) => proc.on('close', this.putsAsync(resolve)))
+    return new Promise((resolve, reject) => {
+      proc.on('close', (code) => {
+        if (code !== 0 && !this.swallowError) {
+          const errorMessage = `Script failed with exit code ${code}: ${command} ${args.join(' ')}`
+          reject(new Error(errorMessage))
+        } else {
+          resolve(code)
+        }
+      })
+    })
   }
 
   private async executeScripts (scripts: Task[], parallel = false, blocking = false) {
@@ -180,7 +202,15 @@ export default class WebpackShellPlugin {
       if (blocking) {
         this.handleScript(script)
       } else if (!blocking) {
-        if (parallel) this.handleScriptAsync(script); else await this.handleScriptAsync(script)
+        if (parallel) {
+          this.handleScriptAsync(script).catch((error) => {
+            if (!this.swallowError) {
+              throw error
+            }
+          })
+        } else {
+          await this.handleScriptAsync(script)
+        }
       }
     }
   }
@@ -199,16 +229,22 @@ export default class WebpackShellPlugin {
   }
 
   private readonly onBeforeRun = async (_compiler: webpack.Compiler, callback?: Function): Promise<void> => {
-    const onBeforeNormalRun = this.onBeforeNormalRun
-    if (onBeforeNormalRun.scripts && onBeforeNormalRun.scripts.length > 0) {
-      this.log('Executing pre-run scripts')
-      await this.executeScripts(onBeforeNormalRun.scripts, onBeforeNormalRun.parallel, onBeforeNormalRun.blocking)
-      if (this.dev) {
-        this.onDoneWatch = JSON.parse(JSON.stringify(defaultTask))
+    try {
+      const onBeforeNormalRun = this.onBeforeNormalRun
+      if (onBeforeNormalRun.scripts && onBeforeNormalRun.scripts.length > 0) {
+        this.log('Executing pre-run scripts')
+        await this.executeScripts(onBeforeNormalRun.scripts, onBeforeNormalRun.parallel, onBeforeNormalRun.blocking)
+        if (this.dev) {
+          this.onDoneWatch = JSON.parse(JSON.stringify(defaultTask))
+        }
       }
-    }
-    if (callback) {
-      callback()
+      if (callback) {
+        callback()
+      }
+    } catch (error) {
+      if (callback) {
+        callback(error)
+      }
     }
   }
 
@@ -216,24 +252,38 @@ export default class WebpackShellPlugin {
     const onAfterDone = this.onAfterDone
     if (onAfterDone.scripts && onAfterDone.scripts.length > 0) {
       this.log('Executing additional scripts before exit')
-      await this.executeScripts(onAfterDone.scripts, onAfterDone.parallel, onAfterDone.blocking)
-      if (this.dev) {
-        this.onBuildExit = JSON.parse(JSON.stringify(defaultTask))
+      try {
+        await this.executeScripts(onAfterDone.scripts, onAfterDone.parallel, onAfterDone.blocking)
+        if (this.dev) {
+          this.onBuildExit = JSON.parse(JSON.stringify(defaultTask))
+        }
+      } catch (error) {
+        // Для синхронного хука afterDone, используем setTimeout для асинхронного завершения процесса
+        setTimeout(() => {
+          console.error(`WebpackShellPluginNext: Script failed: ${error.message}`)
+          process.exit(1)
+        }, 0)
       }
     }
   }
 
   private readonly afterCompile = async (_compilation: webpack.Compilation, callback?: Function): Promise<void> => {
-    const onDoneWatch = this.onDoneWatch
-    if (onDoneWatch.scripts && onDoneWatch.scripts.length > 0) {
-      this.log('Executing additional scripts before exit')
-      await this.executeScripts(onDoneWatch.scripts, onDoneWatch.parallel, onDoneWatch.blocking)
-      if (this.dev) {
-        this.onBuildExit = JSON.parse(JSON.stringify(defaultTask))
+    try {
+      const onDoneWatch = this.onDoneWatch
+      if (onDoneWatch.scripts && onDoneWatch.scripts.length > 0) {
+        this.log('Executing additional scripts before exit')
+        await this.executeScripts(onDoneWatch.scripts, onDoneWatch.parallel, onDoneWatch.blocking)
+        if (this.dev) {
+          this.onBuildExit = JSON.parse(JSON.stringify(defaultTask))
+        }
       }
-    }
-    if (callback) {
-      callback()
+      if (callback) {
+        callback()
+      }
+    } catch (error) {
+      if (callback) {
+        callback(error)
+      }
     }
   };
 
@@ -271,69 +321,93 @@ export default class WebpackShellPlugin {
   };
 
   private readonly onBeforeCompileRun = async (_params: any, callback: () => void): Promise<void> => {
-    const onBeforeCompile = this.onBeforeCompile
-    if (onBeforeCompile.scripts && onBeforeCompile.scripts.length > 0) {
-      this.log('Executing pre-build scripts')
-      await this.executeScripts(onBeforeCompile.scripts, onBeforeCompile.parallel, onBeforeCompile.blocking)
-      if (this.dev) {
-        this.onBuildStart = JSON.parse(JSON.stringify(defaultTask))
+    try {
+      const onBeforeCompile = this.onBeforeCompile
+      if (onBeforeCompile.scripts && onBeforeCompile.scripts.length > 0) {
+        this.log('Executing pre-build scripts')
+        await this.executeScripts(onBeforeCompile.scripts, onBeforeCompile.parallel, onBeforeCompile.blocking)
+        if (this.dev) {
+          this.onBuildStart = JSON.parse(JSON.stringify(defaultTask))
+        }
       }
-    }
-    if (callback) {
-      callback()
+      if (callback) {
+        callback()
+      }
+    } catch (error) {
+      if (callback) {
+        callback()
+      }
     }
   };
 
   private readonly onAfterEmit = async (_compilation: webpack.Compilation, callback?: Function): Promise<void> => {
-    const onBuildEndOption = this.onBuildEnd
-    if (onBuildEndOption.scripts && onBuildEndOption.scripts.length > 0) {
-      this.log('Executing post-build scripts')
-      await this.executeScripts(onBuildEndOption.scripts, onBuildEndOption.parallel, onBuildEndOption.blocking)
-      if (this.dev) {
-        this.onBuildEnd = JSON.parse(JSON.stringify(defaultTask))
+    try {
+      const onBuildEndOption = this.onBuildEnd
+      if (onBuildEndOption.scripts && onBuildEndOption.scripts.length > 0) {
+        this.log('Executing post-build scripts')
+        await this.executeScripts(onBuildEndOption.scripts, onBuildEndOption.parallel, onBuildEndOption.blocking)
+        if (this.dev) {
+          this.onBuildEnd = JSON.parse(JSON.stringify(defaultTask))
+        }
       }
-    }
-    if (callback) {
-      callback()
+      if (callback) {
+        callback()
+      }
+    } catch (error) {
+      if (callback) {
+        callback(error)
+      }
     }
   };
 
   private readonly onDone = async (compilation: webpack.Stats, callback?: Function): Promise<void> => {
-    if (compilation.hasErrors()) {
-      const onBuildError = this.onBuildError
-      if (onBuildError.scripts && onBuildError.scripts.length > 0) {
-        this.warn('Executing error scripts before exit')
-        await this.executeScripts(onBuildError.scripts, onBuildError.parallel, onBuildError.blocking)
-        if (this.dev) {
-          this.onBuildError = JSON.parse(JSON.stringify(defaultTask))
+    try {
+      if (compilation.hasErrors()) {
+        const onBuildError = this.onBuildError
+        if (onBuildError.scripts && onBuildError.scripts.length > 0) {
+          this.warn('Executing error scripts before exit')
+          await this.executeScripts(onBuildError.scripts, onBuildError.parallel, onBuildError.blocking)
+          if (this.dev) {
+            this.onBuildError = JSON.parse(JSON.stringify(defaultTask))
+          }
         }
       }
-    }
-    const onBuildExit = this.onBuildExit
-    if (onBuildExit.scripts && onBuildExit.scripts.length > 0) {
-      this.log('Executing additional scripts before exit')
-      await this.executeScripts(onBuildExit.scripts, onBuildExit.parallel, onBuildExit.blocking)
-      if (this.dev) {
-        this.onBuildExit = JSON.parse(JSON.stringify(defaultTask))
+      const onBuildExit = this.onBuildExit
+      if (onBuildExit.scripts && onBuildExit.scripts.length > 0) {
+        this.log('Executing additional scripts before exit')
+        await this.executeScripts(onBuildExit.scripts, onBuildExit.parallel, onBuildExit.blocking)
+        if (this.dev) {
+          this.onBuildExit = JSON.parse(JSON.stringify(defaultTask))
+        }
       }
-    }
-    if (callback) {
-      callback()
+      if (callback) {
+        callback()
+      }
+    } catch (error) {
+      if (callback) {
+        callback(error)
+      }
     }
   };
 
   private readonly watchRun = async (_compiler: webpack.Compiler, callback?: Function): Promise<void> => {
-    const onWatchRun = this.onWatchRun
-    if (onWatchRun.scripts && onWatchRun.scripts.length) {
-      this.log('Executing onWatchRun build scripts')
-      await this.executeScripts(onWatchRun.scripts, onWatchRun.parallel, onWatchRun.blocking)
-      if (this.dev) {
-        this.onWatchRun = JSON.parse(JSON.stringify(defaultTask))
+    try {
+      const onWatchRun = this.onWatchRun
+      if (onWatchRun.scripts && onWatchRun.scripts.length) {
+        this.log('Executing onWatchRun build scripts')
+        await this.executeScripts(onWatchRun.scripts, onWatchRun.parallel, onWatchRun.blocking)
+        if (this.dev) {
+          this.onWatchRun = JSON.parse(JSON.stringify(defaultTask))
+        }
       }
-    }
 
-    if (callback) {
-      callback()
+      if (callback) {
+        callback()
+      }
+    } catch (error) {
+      if (callback) {
+        callback(error)
+      }
     }
   };
 

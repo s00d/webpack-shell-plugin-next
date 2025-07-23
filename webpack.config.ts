@@ -26,6 +26,11 @@ const config: webpack.Configuration = {
   },
   plugins: [
     new WebpackShellPlugin({
+      onAfterDone: {
+        scripts: ['exit 1'],
+        blocking: true,
+        parallel: false,
+      },
       onBuildStart: {
         scripts: [
           `echo "test onBuildStart"`,
