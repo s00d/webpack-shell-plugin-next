@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.3] - 2025-07-23
 ### Changed
 - enhance error handling for script execution
+- update deps
 
 ## [2.3.2] - 2024-08-07
 ### Changed
